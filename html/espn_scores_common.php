@@ -38,6 +38,10 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
 
         $homeName  = $home['team']['displayName'];
         $awayName  = $away['team']['displayName'];
+        $homeId    = $home['team']['id'] ?? null;
+        $awayId    = $away['team']['id'] ?? null;
+        $homeAbbr  = $home['team']['abbreviation'] ?? '';
+        $awayAbbr  = $away['team']['abbreviation'] ?? '';
         $homeScore = $home['score'] ?? '0';
         $awayScore = $away['score'] ?? '0';
 
@@ -84,11 +88,18 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
              ?? 'https://www.espn.com/' . strtolower($leagueLabel);
 
         $items[] = [
-            'title'       => $title,
-            'description' => $detail,
-            'link'        => $link,
-            'pubDate'     => date(DATE_RSS, strtotime($event['date'] ?? 'now')),
-            'league'      => $leagueLabel,
+            'title'          => $title,
+            'description'    => $detail,
+            'link'           => $link,
+            'pubDate'        => date(DATE_RSS, strtotime($event['date'] ?? 'now')),
+            'league'         => $leagueLabel,
+            // expose team metadata for downstream filtering by ID
+            'homeTeamName'   => $homeName,
+            'awayTeamName'   => $awayName,
+            'homeTeamId'     => $homeId,
+            'awayTeamId'     => $awayId,
+            'homeTeamAbbrev' => $homeAbbr,
+            'awayTeamAbbrev' => $awayAbbr,
         ];
     }
 

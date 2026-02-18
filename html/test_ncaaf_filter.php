@@ -53,10 +53,36 @@ $ep = $sportEndpoints['ncaaf'];
 $items = fetchScoreboard($ep['url'], $ep['label']);
 
 $total = count($items);
-$filtered = [];
+
+// Derive allowed team IDs from the feed by matching names in ncaateams.list
+$allowedIds = [];
 foreach ($items as $it) {
-    if (titleMatchesTeam($it['title'] ?? '', $patterns, $teams)) {
-        $filtered[] = $it;
+    $home = mb_strtolower($it['homeTeamName'] ?? '');
+    $away = mb_strtolower($it['awayTeamName'] ?? '');
+    foreach ($teams as $t) {
+        if ($t === '') continue;
+        if (mb_stripos($home, $t) !== false && !empty($it['homeTeamId'])) {
+            $allowedIds[(string)$it['homeTeamId']] = true;
+        }
+        if (mb_stripos($away, $t) !== false && !empty($it['awayTeamId'])) {
+            $allowedIds[(string)$it['awayTeamId']] = true;
+        }
+    }
+}
+
+$filtered = [];
+if (empty($allowedIds)) {
+    // fallback to title matching
+    foreach ($items as $it) {
+        if (titleMatchesTeam($it['title'] ?? '', $patterns, $teams)) $filtered[] = $it;
+    }
+} else {
+    foreach ($items as $it) {
+        $hid = isset($it['homeTeamId']) ? (string)$it['homeTeamId'] : null;
+        $aid = isset($it['awayTeamId']) ? (string)$it['awayTeamId'] : null;
+        if (($hid && isset($allowedIds[$hid])) || ($aid && isset($allowedIds[$aid]))) {
+            $filtered[] = $it;
+        }
     }
 }
 
