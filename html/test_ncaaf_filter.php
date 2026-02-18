@@ -67,4 +67,11 @@ foreach (array_slice($filtered, 0, 10) as $f) {
     echo "- " . ($f['title'] ?? '') . " | " . ($f['description'] ?? '') . "\n";
 }
 
+if (count($filtered) === 0) {
+    fwrite(STDERR, "ERROR: filtered items == 0\n");
+    exit(2);
+}
+
+exit(0);
+
 ?>
