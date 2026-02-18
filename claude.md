@@ -18,6 +18,9 @@ Constraints & cautions
 - This code targets personal/educational use. Respect ESPN terms and avoid aggressive polling.
 - Keep changes minimal and backwards-compatible with the legacy `rssArduinoPlatform` which expects basic RSS `<item>` tags.
 
+Team filtering note
+- The NCAAF feed can be trimmed by editing `html/ncaateams.list` (format: `id,displayName`; comment lines with `#` to deactivate). The repository defaults enable Big Ten teams plus Central Michigan (`2117`) and Western Michigan (`2711`) to keep the feed small for legacy scrollers.
+
 If you change the RSS structure
 - Update `README.md` and `claude.md` to include the new fields and provide examples.
 - Notify the owner about required changes to the Arduino `sites[]` consumer if tag names/structure change.

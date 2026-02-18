@@ -37,6 +37,10 @@ Notes & cautions
 - The PHP scripts use ESPN's public JSON endpoints. Observe ESPN's Terms of Use and rate limits. These scripts include a short HTTP timeout and a simple User-Agent header for personal/educational use.
 - Timezone formatting in `espn_scores_common.php` uses `America/New_York` to produce human-friendly kickoff strings for pregame events.
 
+Team filtering
+--------------
+- The NCAAF feed is filtered using the `html/ncaateams.list` file (format: `id,displayName`). Lines starting with `#` are inactive. By default the list enables Big Ten teams plus Central Michigan and Western Michigan. Edit `html/ncaateams.list` to enable or disable teams (restart not required).
+
 Quickstart
 ----------
 Run a local PHP server (quick, no Docker required):
