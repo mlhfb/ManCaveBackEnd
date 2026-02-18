@@ -1,5 +1,27 @@
 <?php
 // ─── Shared ESPN Scoreboard → RSS logic ───
+// Provide minimal mbstring polyfills when the PHP `mbstring` extension
+// is not available in the runtime. These fallbacks use single-byte
+// functions and are intentionally small — enabling `mbstring` in
+// production is recommended for full Unicode correctness.
+if (!function_exists('mb_strtolower')) {
+    function mb_strtolower($s, $enc = null) { return strtolower($s); }
+}
+if (!function_exists('mb_strtoupper')) {
+    function mb_strtoupper($s, $enc = null) { return strtoupper($s); }
+}
+if (!function_exists('mb_strpos')) {
+    function mb_strpos($haystack, $needle, $offset = 0, $enc = null) { return strpos($haystack, $needle, $offset); }
+}
+if (!function_exists('mb_stripos')) {
+    function mb_stripos($haystack, $needle, $offset = 0, $enc = null) { return stripos($haystack, $needle, $offset); }
+}
+if (!function_exists('mb_substr')) {
+    function mb_substr($s, $start, $length = null, $enc = null) {
+        if ($length === null) return substr($s, $start);
+        return substr($s, $start, $length);
+    }
+}
 // Include this file, then call outputRSS('nhl') etc.
 
 $sportEndpoints = [
