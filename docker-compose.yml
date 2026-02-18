@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  php-apache:
+    image: php:8.1-apache
+    container_name: mancave-backend-php
+    volumes:
+      - ./html:/var/www/html:ro
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+# Access the site at http://localhost:8080/espn_scores_rss.php
