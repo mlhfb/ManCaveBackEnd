@@ -179,6 +179,34 @@ function applyFeedFilter(array $items, ?array $filter): array {
     }
 }
 
+function formatGameTitle(
+    string $awayName,
+    string $homeName,
+    string $state,
+    string $awayScore,
+    string $homeScore
+): string {
+    // Keep titles compact for legacy scrollers.
+    if ($state === 'pre') {
+        return "$awayName @ $homeName";
+    }
+    return "$awayName $awayScore @ $homeName $homeScore";
+}
+
+function normalizeInProgressDetail(string $shortDetail, string $detail): string {
+    $source = trim($shortDetail !== '' ? $shortDetail : $detail);
+    if ($source === '') {
+        return $detail;
+    }
+
+    // ESPN often returns "5:34 - 3rd" or "5:34 - 3rd Qtr".
+    if (preg_match('/^(\d{1,2}:\d{2})\s*-\s*(\d+(?:st|nd|rd|th))(?:\s*(?:qtr|quarter))?$/i', $source, $m)) {
+        return $m[1] . ' left in the ' . strtolower($m[2]);
+    }
+
+    return $detail !== '' ? $detail : $source;
+}
+
 function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
     $context = stream_context_create([
         'http' => [
@@ -248,9 +276,9 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
             }
         }
 
-        $title = "$leagueLabel: $awayName @ $homeName";
-        if ($state !== 'pre') {
-            $title .= "  $awayScore - $homeScore";
+        $title = formatGameTitle($awayName, $homeName, $state, (string)$awayScore, (string)$homeScore);
+        if ($state === 'in') {
+            $detail = normalizeInProgressDetail((string)$shortDetail, (string)$detail);
         }
 
         $link = $event['links'][0]['href']
