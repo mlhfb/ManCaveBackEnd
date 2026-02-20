@@ -12,7 +12,10 @@ struct site_t sites[] = {
   {"NHL Scores", "https://" HOST "/html/nhl.php", nhl},
   {"NBA Scores", "https://" HOST "/html/nba.php", nba},
   {"NFL Scores", "https://" HOST "/html/nfl.php", nfl},
-  {"NCAA FB",   "https://" HOST "/html/ncaaf.php", ncaaf},
+  // filtered Big Ten/selected NCAAF feed (same output as legacy ncaaf.php)
+  {"NCAA FB",   "https://" HOST "/html/espn_scores_rss.php?sport=big10&format=rss", ncaaf},
+  // legacy alias that returns the same filtered feed:
+  // {"NCAA FB", "https://" HOST "/html/ncaaf.php", ncaaf},
   // optional: a combined feed
   {"All Sports", "https://" HOST "/html/espn_scores_rss.php?sport=all&format=rss", npr}
 };

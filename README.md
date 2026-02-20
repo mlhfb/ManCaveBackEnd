@@ -1,74 +1,71 @@
 ManCaveBackEnd
 ================
 
-Lightweight PHP helper that generates RSS feeds from ESPN scoreboard APIs for use by LED scrollers and legacy projects (e.g. ManCaveScroller / rssArduinoPlatform).
+Lightweight PHP helper that generates RSS feeds from ESPN scoreboard APIs for use by LED scrollers and legacy projects (for example, ManCaveScroller / rssArduinoPlatform).
 
 What this repo contains
-- `html/espn_scores_common.php` — shared logic: fetch ESPN scoreboard JSON → normalize items → render RSS XML. Main helpers: `fetchScoreboard()`, `renderRSS()` and `outputRSS()`.
-- `html/espn_scores_rss.php` — small web UI / preview that uses `espn_scores_common.php`. It can return an HTML preview or output raw RSS when `format=rss` is requested.
-- other sport-specific PHP files in `html/` are simple entry points used in legacy setups.
+- `html/espn_scores_common.php` - shared logic: fetch ESPN scoreboard JSON, normalize items, render RSS XML, and apply optional feed filters.
+- `html/espn_scores_rss.php` - web UI / preview that can render HTML or output raw RSS (`format=rss`).
+- sport entrypoints in `html/` (for example `mlb.php`, `nhl.php`, `ncaaf.php`) for legacy consumers.
 
 Usage
 -----
-Host the `html/` directory on a PHP-capable webserver (Apache, nginx+php-fpm, etc.).
+Host the `html/` directory on a PHP-capable web server (Apache, nginx+php-fpm, and similar).
 
-Basic query parameters
-
-- `sport` — one of `nhl`, `nba`, `mlb`, `nfl`, `ncaaf`, or `all`.
-- `format` — `html` (default) or `rss`. When `format=rss` the script outputs an RSS feed and exits.
+Query parameters
+- `sport` - one of `nhl`, `nba`, `mlb`, `nfl`, `ncaaf`, `big10`, or `all`.
+- `format` - `html` (default) or `rss`.
 
 Examples
-
 - HTML preview for NHL: `/html/espn_scores_rss.php?sport=nhl`
-- RSS feed (machine-readable) for NBA: `/html/espn_scores_rss.php?sport=nba&format=rss`
+- RSS for NBA: `/html/espn_scores_rss.php?sport=nba&format=rss`
+- RSS for filtered Big Ten/selected NCAAF teams: `/html/espn_scores_rss.php?sport=big10&format=rss`
 
 Feed shape
 ----------
-- Each RSS `<item>` contains: `title` (league + matchup + optional score), `description` (status/time/detail), `link` (ESPN match link fallback), `pubDate`, and `<category>` with league label.
+Each RSS `<item>` contains:
+- `title` (league + matchup + optional score)
+- `description` (status/time/detail)
+- `link` (ESPN match link fallback)
+- `pubDate`
+- `<category>` with league label
 
-Integration notes for ManCaveScroller (legacy)
---------------------------------------------
-- The Arduino/ESP code in the legacy `rssArduinoPlatform` (see `src/main.cpp`) fetches XML/RSS from configured URLs in its `sites[]` array. Typical entries point at `https://<host>/mlb.php`, `nhl.php`, etc.
-- Host these PHP files on a reachable server and update `sites[]` in the ESP sketch to point to your instance.
-- The Arduino code expects simple RSS with `<item><title>`, `<description>`, and `<pubDate>` tags — the PHP scripts produce those.
-
-Notes & cautions
-----------------
-- The PHP scripts use ESPN's public JSON endpoints. Observe ESPN's Terms of Use and rate limits. These scripts include a short HTTP timeout and a simple User-Agent header for personal/educational use.
-- Timezone formatting in `espn_scores_common.php` uses `America/New_York` to produce human-friendly kickoff strings for pregame events.
+Integration notes for ManCaveScroller
+-------------------------------------
+- The legacy `rssArduinoPlatform` consumer reads XML/RSS URLs from its `sites[]` array.
+- Point those URLs to your hosted PHP files (for example `https://<host>/html/nhl.php`).
+- Expected tags: `<item><title>`, `<description>`, and `<pubDate>`.
 
 Team filtering
 --------------
-- The NCAAF feed is filtered using the `html/ncaateams.list` file (format: `id,displayName`). Lines starting with `#` are inactive. By default the list enables Big Ten teams plus Central Michigan and Western Michigan. Edit `html/ncaateams.list` to enable or disable teams (restart not required).
+- `sport=big10` applies filtering from `html/ncaateams.list` (format: `id,displayName`, `#` to disable a line).
+- `html/ncaaf.php` is kept as a legacy endpoint and now outputs the same filtered feed as `sport=big10`.
+- `sport=ncaaf` in `espn_scores_rss.php` remains the full unfiltered NCAA Football scoreboard feed.
 
 Quickstart
 ----------
-Run a local PHP server (quick, no Docker required):
-
 PowerShell
 ```powershell
 php -S localhost:8000 -t html
 ```
 
-Open the preview page in your browser:
+Open:
+- `http://localhost:8000/espn_scores_rss.php?sport=nhl`
+- `http://localhost:8000/espn_scores_rss.php?sport=big10&format=rss`
 
-http://localhost:8000/espn_scores_rss.php?sport=nhl
-
-Docker Compose (recommended)
----------------------------
-Bring up a PHP+Apache container that serves the `html/` directory:
-
+Docker Compose
+--------------
 PowerShell
 ```powershell
 docker compose up -d
 ```
 
-Then open http://localhost:8080/espn_scores_rss.php?sport=nhl
+Open:
+- `http://localhost:8080/espn_scores_rss.php?sport=nhl`
+- `http://localhost:8080/espn_scores_rss.php?sport=big10&format=rss`
 
-Examples & integration
-----------------------
-- Example `sites[]` snippet for the legacy ESP scroller: [examples/rssarduino_sites_snippet.md](examples/rssarduino_sites_snippet.md)
-- Local dev quickstart and Docker instructions: [DEVELOPMENT.md](DEVELOPMENT.md)
-- Compose file: [docker-compose.yml](docker-compose.yml)
-
-Would you like me to create a branch and commit these docs changes now? (I can also push and open a PR if you provide the remote name or allow pushing.)
+See also
+--------
+- `examples/rssarduino_sites_snippet.md`
+- `DEVELOPMENT.md`
+- `docker-compose.yml`

@@ -1,23 +1,25 @@
-# NCAAF team list (`ncaateams.list`) — format and usage
+# NCAAF team list (`ncaateams.list`) format and usage
 
 - File: `html/ncaateams.list`
-- Each non-comment line must be: `id,displayName` (comma-separated)
-- The code filters strictly by ESPN team ID (the numeric `team.id` from ESPN JSON).
-- Lines beginning with `#` are inactive and ignored — remove the leading `#` to activate a team.
-- Keeping the `displayName` is for human readability; the running code uses only the `id`.
+- Each non-comment line is `id,displayName`
+- Lines starting with `#` are inactive
+- Filtering is driven by ESPN team ID (`team.id`), with a name-match fallback only when IDs are not provided
 
-Example (active):
-
+Example active line:
+```text
 275,Wisconsin Badgers
+```
 
-Example (inactive):
-
+Example inactive line:
+```text
 #254,Utah Utes
+```
 
-To add or enable a team:
-- Find the ESPN team id (use `tools/generate_ncaateams.ps1` to auto-generate the list),
-- Add the line `id,displayName` to `html/ncaateams.list` (no leading `#`).
+Where this list is used
+- `sport=big10` in `html/espn_scores_rss.php`
+- `html/ncaaf.php` (legacy endpoint aliasing the same filtered feed)
 
-To disable a team, prefix its line with `#`.
-
-Note: `ncaaf.php` derives allowed IDs by reading `ncaateams.list` and matching only on numeric IDs. This avoids false positives caused by display-name variations.
+How to update teams
+1. Find the ESPN team id (`tools/generate_ncaateams.ps1` can help).
+2. Add `id,displayName` to `html/ncaateams.list`.
+3. Prefix with `#` to disable a team.

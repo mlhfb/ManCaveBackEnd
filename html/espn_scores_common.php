@@ -32,6 +32,153 @@ $sportEndpoints = [
     'ncaaf' => ['url' => 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard','label' => 'NCAA Football'],
 ];
 
+$customSportFeeds = [
+    // Uses the NCAAF endpoint and filters to teams enabled in ncaateams.list.
+    'big10' => [
+        'source' => 'ncaaf',
+        'label'  => 'NCAA Football',
+        'filter' => [
+            'type' => 'team_list',
+            'path' => __DIR__ . '/ncaateams.list',
+        ],
+    ],
+];
+
+function getSupportedSportMap(bool $includeCustom = true): array {
+    global $sportEndpoints, $customSportFeeds;
+
+    $supported = $sportEndpoints;
+    if (!$includeCustom) {
+        return $supported;
+    }
+
+    foreach ($customSportFeeds as $sportKey => $config) {
+        $source = $config['source'] ?? '';
+        if (!isset($sportEndpoints[$source])) {
+            continue;
+        }
+        $base = $sportEndpoints[$source];
+        $supported[$sportKey] = [
+            'url'    => $base['url'],
+            'label'  => $config['label'] ?? $base['label'],
+            'filter' => $config['filter'] ?? null,
+        ];
+    }
+
+    return $supported;
+}
+
+function parseTeamListFile(string $listFile): array {
+    if (!is_readable($listFile)) {
+        return ['teamIds' => [], 'teamNames' => []];
+    }
+
+    $lines = file($listFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return ['teamIds' => [], 'teamNames' => []];
+    }
+
+    $teamIds = [];
+    $teamNames = [];
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') {
+            continue;
+        }
+
+        if (strpos($line, ',') !== false) {
+            list($id, $name) = explode(',', $line, 2);
+            $id = trim($id);
+            $name = trim($name);
+            if ($id !== '') {
+                $teamIds[(string)$id] = true;
+            }
+            if ($name !== '') {
+                $teamNames[] = mb_strtolower($name);
+            }
+            continue;
+        }
+
+        // Legacy support for one team name per line.
+        $teamNames[] = mb_strtolower($line);
+    }
+
+    return ['teamIds' => $teamIds, 'teamNames' => $teamNames];
+}
+
+function filterItemsByTeamList(array $items, string $listFile): array {
+    $parsed = parseTeamListFile($listFile);
+    $teamIds = $parsed['teamIds'];
+    $teamNames = $parsed['teamNames'];
+
+    // Missing/empty list means "do not filter".
+    if (empty($teamIds) && empty($teamNames)) {
+        return $items;
+    }
+
+    $allowedIds = $teamIds;
+    if (empty($allowedIds)) {
+        // Derive allowed IDs by matching display names from the feed.
+        foreach ($items as $it) {
+            $home = mb_strtolower($it['homeTeamName'] ?? '');
+            $away = mb_strtolower($it['awayTeamName'] ?? '');
+            foreach ($teamNames as $teamName) {
+                if ($teamName === '') {
+                    continue;
+                }
+                if (mb_stripos($home, $teamName) !== false && !empty($it['homeTeamId'])) {
+                    $allowedIds[(string)$it['homeTeamId']] = true;
+                }
+                if (mb_stripos($away, $teamName) !== false && !empty($it['awayTeamId'])) {
+                    $allowedIds[(string)$it['awayTeamId']] = true;
+                }
+            }
+        }
+    }
+
+    if (empty($allowedIds)) {
+        // Last-resort fallback: title/name matching.
+        $filtered = array_filter($items, function ($item) use ($teamNames) {
+            $title = mb_strtolower($item['title'] ?? '');
+            foreach ($teamNames as $teamName) {
+                if ($teamName === '') {
+                    continue;
+                }
+                if (mb_stripos($title, $teamName) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        return array_values($filtered);
+    }
+
+    $filtered = array_filter($items, function ($item) use ($allowedIds) {
+        $hid = isset($item['homeTeamId']) ? (string)$item['homeTeamId'] : null;
+        $aid = isset($item['awayTeamId']) ? (string)$item['awayTeamId'] : null;
+        return ($hid && isset($allowedIds[$hid])) || ($aid && isset($allowedIds[$aid]));
+    });
+
+    return array_values($filtered);
+}
+
+function applyFeedFilter(array $items, ?array $filter): array {
+    if (empty($filter) || !isset($filter['type'])) {
+        return $items;
+    }
+
+    switch ($filter['type']) {
+        case 'team_list':
+            $listFile = isset($filter['path']) ? (string)$filter['path'] : '';
+            if ($listFile === '') {
+                return $items;
+            }
+            return filterItemsByTeamList($items, $listFile);
+        default:
+            return $items;
+    }
+}
+
 function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
     $context = stream_context_create([
         'http' => [
@@ -161,21 +308,24 @@ function xmlSafe(string $s): string {
  * @param string|array $sports  e.g. 'nhl' or ['nhl','nba'] or 'all'
  */
 function outputRSS($sports = 'all'): void {
-    global $sportEndpoints;
-
     if ($sports === 'all') {
-        $selected = $sportEndpoints;
+        // Keep "all" as the core leagues only to avoid duplicate NCAAF output.
+        $selected = getSupportedSportMap(false);
     } elseif (is_array($sports)) {
-        $selected = array_intersect_key($sportEndpoints, array_flip($sports));
+        $supported = getSupportedSportMap(true);
+        $selected = array_intersect_key($supported, array_flip($sports));
     } else {
-        $selected = isset($sportEndpoints[$sports])
-            ? [$sports => $sportEndpoints[$sports]]
+        $supported = getSupportedSportMap(true);
+        $selected = isset($supported[$sports])
+            ? [$sports => $supported[$sports]]
             : [];
     }
 
     $allItems = [];
     foreach ($selected as $ep) {
-        $allItems = array_merge($allItems, fetchScoreboard($ep['url'], $ep['label']));
+        $items = fetchScoreboard($ep['url'], $ep['label']);
+        $items = applyFeedFilter($items, $ep['filter'] ?? null);
+        $allItems = array_merge($allItems, $items);
     }
 
     $labels = array_column($selected, 'label');

@@ -26,12 +26,14 @@
     <a href="?sport=mlb">MLB</a>
     <a href="?sport=nfl">NFL</a>
     <a href="?sport=ncaaf">NCAA Football</a>
+    <a href="?sport=big10">Big10 (Filtered)</a>
     <a href="?sport=all">All Sports</a>
     <a href="?sport=nhl&format=rss">NHL RSS</a>
     <a href="?sport=nba&format=rss">NBA RSS</a>
     <a href="?sport=mlb&format=rss">MLB RSS</a>
     <a href="?sport=nfl&format=rss">NFL RSS</a>
     <a href="?sport=ncaaf&format=rss">NCAA FB RSS</a>
+    <a href="?sport=big10&format=rss">Big10 RSS</a>
     <a href="?sport=all&format=rss">All RSS</a>
 </div>
 
@@ -40,6 +42,7 @@ require_once __DIR__ . '/espn_scores_common.php';
 
 $sport  = $_GET['sport']  ?? '';
 $format = $_GET['format'] ?? 'html';
+$supportedSports = getSupportedSportMap(true);
 
 if ($sport !== '') {
     // If RSS format requested, use the shared helper and exit
@@ -50,9 +53,9 @@ if ($sport !== '') {
 
     // Determine which sports to fetch for HTML preview
     if ($sport === 'all') {
-        $selected = $sportEndpoints;
-    } elseif (isset($sportEndpoints[$sport])) {
-        $selected = [$sport => $sportEndpoints[$sport]];
+        $selected = getSupportedSportMap(false);
+    } elseif (isset($supportedSports[$sport])) {
+        $selected = [$sport => $supportedSports[$sport]];
     } else {
         echo "<p>Unknown sport: " . htmlspecialchars($sport) . "</p>";
         $selected = [];
@@ -60,12 +63,14 @@ if ($sport !== '') {
 
     $allItems = [];
     foreach ($selected as $ep) {
-        $allItems = array_merge($allItems, fetchScoreboard($ep['url'], $ep['label']));
+        $items = fetchScoreboard($ep['url'], $ep['label']);
+        $items = applyFeedFilter($items, $ep['filter'] ?? null);
+        $allItems = array_merge($allItems, $items);
     }
 
     $feedTitle = ($sport === 'all')
         ? 'ESPN Scores — All Sports'
-        : 'ESPN Scores — ' . ($sportEndpoints[$sport]['label'] ?? strtoupper($sport));
+        : 'ESPN Scores — ' . ($supportedSports[$sport]['label'] ?? strtoupper($sport));
 
     $rssXml = renderRSS($allItems, $feedTitle);
 
