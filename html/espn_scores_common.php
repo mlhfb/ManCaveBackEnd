@@ -193,15 +193,130 @@ function formatGameTitle(
     return "$awayName $awayScore @ $homeName $homeScore";
 }
 
-function normalizeInProgressDetail(string $shortDetail, string $detail): string {
+function ordinalizeNumber(int $n): string {
+    $suffixes = [1 => 'st', 2 => 'nd', 3 => 'rd'];
+    if ($n % 100 >= 11 && $n % 100 <= 13) {
+        return $n . 'th';
+    }
+    $suffix = isset($suffixes[$n % 10]) ? $suffixes[$n % 10] : 'th';
+    return $n . $suffix;
+}
+
+function normalizeBaseballInProgressDetail(string $source): ?string {
+    $s = trim($source);
+
+    if (preg_match('/^(top|bot|bottom|mid|end)\s+(\d{1,2})(?:st|nd|rd|th)?\b/i', $s, $m)) {
+        $half = strtolower($m[1]);
+        $inning = ordinalizeNumber((int)$m[2]);
+        if ($half === 'bot') {
+            $half = 'bottom';
+        } elseif ($half === 'mid') {
+            $half = 'middle';
+        } elseif ($half === 'end') {
+            $half = 'end';
+        }
+        return 'In the ' . $half . ' of the ' . $inning . '.';
+    }
+
+    if (preg_match('/^([tb])(\d{1,2})$/i', $s, $m)) {
+        $half = strtolower($m[1]) === 't' ? 'top' : 'bottom';
+        $inning = ordinalizeNumber((int)$m[2]);
+        return 'In the ' . $half . ' of the ' . $inning . '.';
+    }
+
+    return null;
+}
+
+function normalizeClockPeriodDetail(string $source, string $leagueLabel): ?string {
+    $s = trim($source);
+    $clockPattern = '/^\d{1,2}:\d{2}$/';
+    $clock = null;
+    $periodRaw = null;
+
+    $parts = preg_split('/\s*-\s*/', $s);
+    if (is_array($parts) && count($parts) === 2) {
+        $a = trim((string)$parts[0]);
+        $b = trim((string)$parts[1]);
+
+        if (preg_match($clockPattern, $a)) {
+            $clock = $a;
+            $periodRaw = $b;
+        } elseif (preg_match($clockPattern, $b)) {
+            $clock = $b;
+            $periodRaw = $a;
+        }
+    }
+
+    if ($clock === null || $periodRaw === null) {
+        // Fallback for forms like "3rd 5:34" or "5:34 3rd".
+        if (preg_match('/^(.+)\s+(\d{1,2}:\d{2})$/', $s, $m)) {
+            $periodRaw = trim($m[1]);
+            $clock = $m[2];
+        } elseif (preg_match('/^(\d{1,2}:\d{2})\s+(.+)$/', $s, $m)) {
+            $clock = $m[1];
+            $periodRaw = trim($m[2]);
+        }
+    }
+
+    if ($clock === null || $periodRaw === null || !preg_match($clockPattern, $clock)) {
+        return null;
+    }
+
+    $period = preg_replace('/\b(qtr|quarter|period)\b/i', '', $periodRaw);
+    $period = trim((string)$period);
+    if ($period === '') {
+        return null;
+    }
+
+    $periodLower = strtolower($period);
+    $isOrdinal = preg_match('/^\d+(?:st|nd|rd|th)$/', $periodLower) === 1;
+    $isOt = preg_match('/^\d*ot$/i', $period) === 1;
+
+    if ($leagueLabel === 'NHL') {
+        if ($isOrdinal) {
+            return $clock . ' to go in the ' . $periodLower . ' period.';
+        }
+        if ($isOt) {
+            return $clock . ' to go in ' . strtoupper($period) . '.';
+        }
+    }
+
+    if ($leagueLabel === 'NFL' || $leagueLabel === 'NCAA Football' || $leagueLabel === 'NBA') {
+        if ($isOrdinal) {
+            return $clock . ' left in the ' . $periodLower . ' quarter.';
+        }
+        if ($isOt) {
+            return $clock . ' left in ' . strtoupper($period) . '.';
+        }
+        return $clock . ' left in the ' . $periodLower . '.';
+    }
+
+    if ($isOrdinal) {
+        return $clock . ' left in the ' . $periodLower . '.';
+    }
+    if ($isOt) {
+        return $clock . ' left in ' . strtoupper($period) . '.';
+    }
+
+    return $clock . ' left in the ' . $periodLower . '.';
+}
+
+function normalizeInProgressDetail(string $leagueLabel, string $shortDetail, string $detail): string {
     $source = trim($shortDetail !== '' ? $shortDetail : $detail);
     if ($source === '') {
         return $detail;
     }
 
-    // ESPN often returns "5:34 - 3rd" or "5:34 - 3rd Qtr".
-    if (preg_match('/^(\d{1,2}:\d{2})\s*-\s*(\d+(?:st|nd|rd|th))(?:\s*(?:qtr|quarter))?$/i', $source, $m)) {
-        return $m[1] . ' left in the ' . strtolower($m[2]);
+    if ($leagueLabel === 'MLB') {
+        $baseball = normalizeBaseballInProgressDetail($source);
+        if ($baseball !== null) {
+            return $baseball;
+        }
+    }
+
+    $clockPeriod = normalizeClockPeriodDetail($source, $leagueLabel);
+    if ($clockPeriod !== null) {
+        return $clockPeriod;
     }
 
     return $detail !== '' ? $detail : $source;
@@ -278,7 +393,7 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
 
         $title = formatGameTitle($awayName, $homeName, $state, (string)$awayScore, (string)$homeScore);
         if ($state === 'in') {
-            $detail = normalizeInProgressDetail((string)$shortDetail, (string)$detail);
+            $detail = normalizeInProgressDetail($leagueLabel, (string)$shortDetail, (string)$detail);
         }
 
         $link = $event['links'][0]['href']
