@@ -215,13 +215,13 @@ function normalizeBaseballInProgressDetail(string $source): ?string {
         } elseif ($half === 'end') {
             $half = 'end';
         }
-        return 'In the ' . $half . ' of the ' . $inning . '.';
+        return  $half . ' of the ' . $inning . '.';
     }
 
     if (preg_match('/^([tb])(\d{1,2})$/i', $s, $m)) {
         $half = strtolower($m[1]) === 't' ? 'top' : 'bottom';
         $inning = ordinalizeNumber((int)$m[2]);
-        return 'In the ' . $half . ' of the ' . $inning . '.';
+        return   $half . ' of the ' . $inning . '.';
     }
 
     return null;
