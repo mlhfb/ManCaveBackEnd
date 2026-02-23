@@ -1,76 +1,91 @@
 ManCaveBackEnd
 ================
 
-Lightweight PHP helper that generates RSS feeds from ESPN scoreboard APIs for use by LED scrollers and legacy projects (for example, ManCaveScroller / rssArduinoPlatform).
+Lightweight PHP feeds for LED scrollers and other small clients.
+This project reads ESPN scoreboard JSON and exposes normalized RSS and JSON outputs.
 
-What this repo contains
-- `html/espn_scores_common.php` - shared logic: fetch ESPN scoreboard JSON, normalize items, render RSS XML, and apply optional feed filters.
-- `html/espn_scores_rss.php` - web UI / preview that can render HTML or output raw RSS (`format=rss`).
-- sport entrypoints in `html/` (for example `mlb.php`, `nhl.php`, `ncaaf.php`) for legacy consumers.
+What is in this repo
+- `html/espn_scores_common.php`: shared fetch/parse/filter/format logic.
+- `html/espn_scores_rss.php`: web preview page with query-based feed output options.
+- `html/nhl.php`, `html/nba.php`, `html/mlb.php`, `html/nfl.php`: sport-specific RSS endpoints.
+- `html/ncaaf.php`: legacy endpoint that outputs the filtered `big10` feed.
+- `html/ncaateams.list`: enabled/disabled team list used by the `big10` filter.
 
-Usage
------
-Host the `html/` directory on a PHP-capable web server (Apache, nginx+php-fpm, and similar).
+Supported sport keys
+- `nhl`
+- `nba`
+- `mlb`
+- `nfl`
+- `ncaaf` (unfiltered college football scoreboard)
+- `big10` (college football scoreboard filtered by `ncaateams.list`)
+- `all` (core leagues only, no duplicate custom feed)
 
-Query parameters
-- `sport` - one of `nhl`, `nba`, `mlb`, `nfl`, `ncaaf`, `big10`, or `all`.
-- `format` - `html` (default), `rss`, or `json`.
-
-Examples
-- HTML preview for NHL: `/html/espn_scores_rss.php?sport=nhl`
-- RSS for NBA: `/html/espn_scores_rss.php?sport=nba&format=rss`
-- JSON for NHL (with team and score colors): `/html/espn_scores_rss.php?sport=nhl&format=json`
-- RSS for filtered Big Ten/selected NCAAF teams: `/html/espn_scores_rss.php?sport=big10&format=rss`
-
-Feed shape
-----------
-Each RSS `<item>` contains:
-- `title` (league + matchup + optional score)
-- `description` (status/time/detail)
-- `link` (ESPN match link fallback)
-- `pubDate`
-- `<category>` with league label
-
-JSON feed shape (`format=json`)
--------------------------------
-Top-level fields:
-- `feedTitle`
-- `sport`
-- `generatedAt`
-- `itemCount`
-- `items[]`
-
-Each JSON item includes:
-- `title`, `description`, `link`, `pubDate`, `league`
-- `state` (`pre`, `in`, `post`, etc.)
-- `isLive` (boolean)
-- `leader` (`home`, `away`, `tie`, `unknown`)
-- `home` and `away` objects with:
-  - `id`, `name`, `abbr`, `score`
-  - `teamColor` (primary team color)
-  - `alternateColor`
-  - `scoreColor` (`#00FF00` leader, `#FF0000` trailer, tie/unknown fallback color)
-
-Color sourcing
+Endpoint usage
 --------------
-- Team colors are sourced from ESPN API team metadata (`team.color` and `team.alternateColor`) whenever available.
-- A small fallback map is included for currently enabled `big10` team IDs in case ESPN color data is missing.
+Primary preview/dispatcher endpoint:
+- `/html/espn_scores_rss.php`
 
-Integration notes for ManCaveScroller
--------------------------------------
-- The legacy `rssArduinoPlatform` consumer reads XML/RSS URLs from its `sites[]` array.
-- Point those URLs to your hosted PHP files (for example `https://<host>/html/nhl.php`).
-- Expected tags: `<item><title>`, `<description>`, and `<pubDate>`.
+Query parameters:
+- `sport`: one of the keys above.
+- `format`: `html` (default), `rss`, or `json`.
 
-Team filtering
+Examples:
+- HTML preview: `/html/espn_scores_rss.php?sport=nhl`
+- RSS: `/html/espn_scores_rss.php?sport=nba&format=rss`
+- JSON: `/html/espn_scores_rss.php?sport=nfl&format=json`
+- Filtered NCAAF RSS: `/html/espn_scores_rss.php?sport=big10&format=rss`
+
+Legacy single-sport RSS endpoints:
+- `/html/nhl.php`
+- `/html/nba.php`
+- `/html/mlb.php`
+- `/html/nfl.php`
+- `/html/ncaaf.php` (alias for filtered `big10`)
+
+Output formats
 --------------
-- `sport=big10` applies filtering from `html/ncaateams.list` (format: `id,displayName`, `#` to disable a line).
-- `html/ncaaf.php` is kept as a legacy endpoint and now outputs the same filtered feed as `sport=big10`.
-- `sport=ncaaf` in `espn_scores_rss.php` remains the full unfiltered NCAA Football scoreboard feed.
+RSS:
+- Standard RSS 2.0 channel
+- `<item>` includes `title`, `description`, `link`, `category`, `pubDate`
+
+JSON:
+- Top-level: `feedTitle`, `sport`, `generatedAt`, `itemCount`, `items`
+- Per item: `title`, `description`, `link`, `pubDate`, `league`, `state`, `isLive`, `leader`
+- Team objects:
+- `home`: `id`, `name`, `abbr`, `score`, `teamColor`, `alternateColor`, `scoreColor`
+- `away`: `id`, `name`, `abbr`, `score`, `teamColor`, `alternateColor`, `scoreColor`
+
+Formatting behavior
+-------------------
+Title format:
+- Pregame: `Away Team @ Home Team`
+- In-progress/final: `Away Team 22 @ Home Team 30`
+
+In-progress description normalization:
+- NFL / NCAA / NBA: `5:34 left in the 3rd quarter.`
+- NHL: `3:02 to go in the 3rd period.`
+- MLB: `top of the 7th.` / `bottom of the 9th.`
+
+Score/state metadata:
+- `isLive` is true when ESPN state is `in`
+- `leader` is `home`, `away`, `tie`, or `unknown`
+- `scoreColor` is green/red/gold/white depending on score state
+
+Team colors
+-----------
+- Primary source: ESPN team color fields (`team.color`, `team.alternateColor`)
+- Fallback source: internal map for currently enabled Big Ten feed IDs when ESPN fields are missing
+
+Team filtering (`big10`)
+------------------------
+- Team list file: `html/ncaateams.list`
+- Active line format: `id,displayName`
+- Disabled lines start with `#`
+- Filtering prefers explicit team IDs, with name matching as fallback
 
 Quickstart
 ----------
-PowerShell
+Local PHP server:
 ```powershell
 php -S localhost:8000 -t html
 ```
@@ -78,20 +93,28 @@ php -S localhost:8000 -t html
 Open:
 - `http://localhost:8000/espn_scores_rss.php?sport=nhl`
 - `http://localhost:8000/espn_scores_rss.php?sport=big10&format=rss`
+- `http://localhost:8000/espn_scores_rss.php?sport=nfl&format=json`
 
-Docker Compose
---------------
-PowerShell
+Docker Compose:
 ```powershell
 docker compose up -d
 ```
 
 Open:
 - `http://localhost:8080/espn_scores_rss.php?sport=nhl`
-- `http://localhost:8080/espn_scores_rss.php?sport=big10&format=rss`
+
+Testing
+-------
+Run the Big10 filter test harness:
+```powershell
+php html/test_ncaaf_filter.php
+```
 
 See also
 --------
-- `examples/rssarduino_sites_snippet.md`
 - `DEVELOPMENT.md`
-- `docker-compose.yml`
+- `CHANGELOG.md`
+- `TODO.md`
+- `claude.md`
+- `examples/rssarduino_sites_snippet.md`
+- `html/NCAAF_TEAMS.md`

@@ -1,45 +1,59 @@
-Local Development
------------------
+Development Notes
+=================
 
-Requirements
-- PHP 8.1+ for local CLI/server usage.
+Prerequisites
+- PHP 8.1 or newer.
+- `allow_url_fopen` enabled in PHP (required for ESPN fetches).
 - Optional: Docker + Docker Compose.
 
-Run locally (no Docker)
------------------------
-PowerShell
+Run locally
+-----------
 ```powershell
 php -S localhost:8000 -t html
 ```
 
-Open:
+Useful URLs:
 - `http://localhost:8000/espn_scores_rss.php?sport=nhl`
 - `http://localhost:8000/espn_scores_rss.php?sport=big10&format=rss`
-- `http://localhost:8000/espn_scores_rss.php?sport=big10&format=json`
+- `http://localhost:8000/espn_scores_rss.php?sport=nfl&format=json`
+- `http://localhost:8000/ncaaf.php`
 
-Run with Docker Compose
------------------------
-PowerShell
+Run with Docker
+---------------
 ```powershell
 docker compose up -d
 ```
 
-Open:
+Then browse:
 - `http://localhost:8080/espn_scores_rss.php?sport=nhl`
-- `http://localhost:8080/espn_scores_rss.php?sport=big10&format=rss`
-- `http://localhost:8080/espn_scores_rss.php?sport=big10&format=json`
 
-Run the filter test
--------------------
-PowerShell
+Validation scripts
+------------------
+Big10 filter regression:
 ```powershell
 php html/test_ncaaf_filter.php
 ```
 
+Team list generation:
+- PowerShell generator:
+```powershell
+pwsh tools/generate_ncaateams.ps1
+```
+- PHP generator:
+```powershell
+php html/generate_ncaateams_list.php
+```
+
+CI
+--
+- Workflow: `.github/workflows/ncaaf-filter-test.yml`
+- Current CI checks:
+- PHP setup and runtime info
+- `html/test_ncaaf_filter.php`
+- Upload test output artifact
+
 Notes
 -----
-- The Docker Compose service uses `php:8.1-apache` and serves `html/` as `/var/www/html`.
-- `sport=big10` is the filtered NCAA feed based on `html/ncaateams.list`.
-- `html/ncaaf.php` is a legacy endpoint alias for the same filtered output.
-- `espn_scores_rss.php` supports `format=html`, `format=rss`, and `format=json`.
-- Ensure legacy ESP clients can reach your host (IP/DNS, HTTP/HTTPS trust, firewall).
+- `html/ncaaf.php` intentionally returns the filtered `big10` feed.
+- ESPN endpoint structure can change; keep parsing defensive.
+- Legacy scroller clients expect simple RSS fields (`title`, `description`, `pubDate`).

@@ -1,51 +1,57 @@
-# claude.md - guidance for AI maintainers
+# claude.md - Maintainer Guide
 
 Purpose
-- Quick orientation for assistants modifying this repository.
+- Quick orientation for AI/code assistants working in this repository.
 
-Core architecture
-- `html/espn_scores_common.php` is the main library:
-  - ESPN endpoint map (`$sportEndpoints`)
-  - Custom feed map (`$customSportFeeds`, currently `big10`)
-  - Scoreboard fetch/parsing
-  - Team-list filtering
-  - Scroller-friendly title and status formatting
-  - RSS/JSON rendering and output (`outputRSS`, `outputJSON`)
+Core files
+- `html/espn_scores_common.php`: central logic for fetch, parse, filter, normalize, and output.
+- `html/espn_scores_rss.php`: preview/dispatcher endpoint with `sport` and `format` query args.
+- `html/ncaaf.php`: legacy alias endpoint that calls `outputRSS('big10')`.
+- `html/test_ncaaf_filter.php`: filter-path regression script.
 
-- `html/espn_scores_rss.php` is the preview/dispatcher page:
-  - `format=html` preview table + raw XML
-  - `format=rss` direct RSS output
-  - `format=json` direct JSON output
+Sport maps
+- Base sports are defined in `$sportEndpoints`.
+- Custom feeds are defined in `$customSportFeeds`.
+- Current custom feed: `big10` mapped to `ncaaf` endpoint + team-list filter.
 
-- Legacy entrypoints:
-  - `html/nhl.php`, `html/nba.php`, `html/mlb.php`, `html/nfl.php`
-  - `html/ncaaf.php` (alias for filtered `big10`)
+Filter model
+- Team-list file: `html/ncaateams.list`
+- Active row format: `id,displayName`
+- `#` prefix disables row.
+- Filtering order:
+- Prefer explicit ID matching
+- Fallback to name matching if IDs are unavailable
 
-Current feed behavior
+Output contracts
+- RSS:
+- Rendered via `renderRSS()`
+- Item keys: title, description, link, league/category, pubDate
+
+- JSON:
+- Rendered via `renderJSON()`
+- Includes game state metadata and team objects:
+- Top-level: `feedTitle`, `sport`, `generatedAt`, `itemCount`, `items`
+- Item-level: `state`, `isLive`, `leader`, `home`, `away`
+- Team-level colors are exposed (`teamColor`, `alternateColor`, `scoreColor`)
+
+Formatting logic
 - Title:
-  - Pregame: `Away @ Home`
-  - Live/Final: `Away SCORE @ Home SCORE`
-
+- Pregame: `Away @ Home`
+- In-progress/final: `Away SCORE @ Home SCORE`
 - In-progress description normalization:
-  - NFL/NCAA/NBA: `5:34 left in the 3rd quarter.`
-  - NHL: `3:02 to go in the 3rd period.`
-  - MLB: `top of the 7th.` / `bottom of the 9th.`
+- Football/basketball quarter phrasing
+- Hockey period phrasing
+- Baseball inning phrasing
 
-Team filtering
-- Source file: `html/ncaateams.list`
-- Active format: `id,displayName`
-- `#` prefix disables a team
-- Filtering prefers IDs, falls back to name matching only when needed
+Color logic
+- Prefer ESPN team color fields.
+- Use fallback map for specific teams when ESPN colors are missing.
+- Score colors indicate leader/trailer/tie/unknown.
 
-Tests and CI
-- Local: `php html/test_ncaaf_filter.php`
-- CI workflow: `.github/workflows/ncaaf-filter-test.yml`
+CI and local checks
+- Workflow: `.github/workflows/ncaaf-filter-test.yml`
+- Local command: `php html/test_ncaaf_filter.php`
 
-Maintenance rules
-- Keep RSS output structure simple and backward-compatible for legacy scroller parsers.
-- Keep changes small and centralized in `espn_scores_common.php` where possible.
-- If output wording/format changes, update docs:
-  - `README.md`
-  - `DEVELOPMENT.md`
-  - `examples/rssarduino_sites_snippet.md`
-  - `CHANGELOG.md`
+Documentation expectations
+- Keep `README.md`, `DEVELOPMENT.md`, `CHANGELOG.md`, and `examples/` aligned with code behavior.
+- If output shape changes, update docs in the same PR/commit.

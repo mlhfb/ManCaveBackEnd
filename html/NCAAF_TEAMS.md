@@ -1,30 +1,37 @@
-# NCAAF team list (`ncaateams.list`) format and usage
+# NCAAF Team List (`ncaateams.list`)
 
-- File: `html/ncaateams.list`
-- Each non-comment line is `id,displayName`
-- Lines starting with `#` are inactive
-- Filtering is driven by ESPN team ID (`team.id`), with a name-match fallback only when IDs are not provided
+File
+- `html/ncaateams.list`
 
-Example active line:
+Line format
+- Active line: `id,displayName`
+- Inactive line: `#id,displayName`
+
+Behavior
+- Used by the `big10` custom feed filter.
+- `html/ncaaf.php` returns this filtered feed.
+- `html/test_ncaaf_filter.php` validates this filter path.
+
+Filtering logic
+- Primary match: ESPN numeric team ID (`team.id`).
+- Fallback match: team names if IDs are unavailable.
+
+Examples
+- Active:
 ```text
 275,Wisconsin Badgers
 ```
 
-Example inactive line:
+- Inactive:
 ```text
 #254,Utah Utes
 ```
 
-Where this list is used
-- `sport=big10` in `html/espn_scores_rss.php`
-- `html/ncaaf.php` (legacy endpoint aliasing the same filtered feed)
-- `html/test_ncaaf_filter.php` (CI/local validation of filtered output)
-
-How to update teams
-1. Find the ESPN team id (`tools/generate_ncaateams.ps1` can help).
-2. Add `id,displayName` to `html/ncaateams.list`.
+How to update
+1. Find/confirm ESPN team IDs.
+2. Add or edit rows in `html/ncaateams.list`.
 3. Prefix with `#` to disable a team.
 
-Notes
-- Filtering in code prefers explicit IDs and falls back to name matching only if IDs are not present.
-- The default active set is intended for a Big Ten focused feed plus selected extras.
+Generation helpers
+- `pwsh tools/generate_ncaateams.ps1`
+- `php html/generate_ncaateams_list.php`

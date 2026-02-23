@@ -1,22 +1,27 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are tracked here.
 
 Unreleased
----------
-- Initial import and documentation added.
-- Enabled Big Ten teams and added Central Michigan (id 2117) and Western Michigan (id 2711) to the active `ncaateams.list` for the NCAAF filtered feed.
-- Added `sport=big10` to `espn_scores_rss.php`, backed by shared filtering logic in `espn_scores_common.php`.
-- Refactored `ncaaf.php` to use the shared `big10` filter path.
-- Updated score title formatting for scrollers: `Team A 22 @ Team B 30`.
-- Added sport-aware in-progress wording normalization:
-  - NFL/NCAA/NBA: `5:34 left in the 3rd quarter.`
-  - NHL: `3:02 to go in the 3rd period.`
-  - MLB: `top of the 7th.` / `bottom of the 9th.`
-- Added JSON feed output support (`format=json`) in `espn_scores_rss.php`/`espn_scores_common.php`.
-- Refreshed repository documentation (`README.md`, `DEVELOPMENT.md`, `claude.md`, `examples/`, and `html/NCAAF_TEAMS.md`).
+----------
+- Added/kept Big Ten filtered feed support via `sport=big10`.
+- Kept `html/ncaaf.php` as a legacy alias of the filtered `big10` feed.
+- Added richer game metadata and styling helpers in `espn_scores_common.php`:
+- Team color parsing with fallback map
+- Leader/tie/unknown detection
+- Score color hints for home/away
+- Added JSON output path with structured home/away objects.
+- Added sport-specific in-progress status normalization:
+- Football/basketball quarter wording
+- Hockey period wording
+- Baseball inning wording
+- Kept scroller-friendly title formatting:
+- Pregame `Away @ Home`
+- In-progress/final `Away SCORE @ Home SCORE`
+- Updated repository documentation to match current code paths and outputs.
 
 v0.1.0 - Initial release
 ------------------------
-- Added `espn_scores_common.php` and `espn_scores_rss.php` to generate RSS from ESPN scoreboard APIs.
-- Documented usage and integration notes for the legacy `rssArduinoPlatform` scroller.
+- Introduced shared ESPN-to-RSS conversion logic.
+- Added multi-sport preview/dispatcher endpoint.
+- Added legacy sport-specific entrypoints for scroller compatibility.
