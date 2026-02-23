@@ -35,6 +35,13 @@
     <a href="?sport=ncaaf&format=rss">NCAA FB RSS</a>
     <a href="?sport=big10&format=rss">Big10 RSS</a>
     <a href="?sport=all&format=rss">All RSS</a>
+    <a href="?sport=nhl&format=json">NHL JSON</a>
+    <a href="?sport=nba&format=json">NBA JSON</a>
+    <a href="?sport=mlb&format=json">MLB JSON</a>
+    <a href="?sport=nfl&format=json">NFL JSON</a>
+    <a href="?sport=ncaaf&format=json">NCAA FB JSON</a>
+    <a href="?sport=big10&format=json">Big10 JSON</a>
+    <a href="?sport=all&format=json">All JSON</a>
 </div>
 
 <?php
@@ -49,6 +56,9 @@ if ($sport !== '') {
     if ($format === 'rss') {
         outputRSS($sport);
         // outputRSS calls exit, so nothing below runs
+    } elseif ($format === 'json') {
+        outputJSON($sport);
+        // outputJSON calls exit, so nothing below runs
     }
 
     // Determine which sports to fetch for HTML preview

@@ -44,6 +44,29 @@ $customSportFeeds = [
     ],
 ];
 
+// Fallback colors only for teams where ESPN color data may be missing.
+// ESPN team.color/team.alternateColor is preferred whenever present.
+$fallbackTeamColors = [
+    // Big10 feed team IDs from ncaateams.list
+    '356'  => '#FF5F05', // Illinois
+    '84'   => '#970310', // Indiana
+    '2294' => '#231F20', // Iowa
+    '120'  => '#CE1126', // Maryland
+    '127'  => '#173F35', // Michigan State
+    '130'  => '#00274C', // Michigan
+    '135'  => '#5E0A2F', // Minnesota
+    '158'  => '#E31937', // Nebraska
+    '77'   => '#492F92', // Northwestern
+    '194'  => '#BA0C2F', // Ohio State
+    '213'  => '#061440', // Penn State
+    '2509' => '#CEB888', // Purdue
+    '164'  => '#CE0E2D', // Rutgers
+    '275'  => '#A00000', // Wisconsin
+    // Additional IDs currently enabled in this list
+    '2117' => '#4C0027', // Central Michigan
+    '2711' => '#532E1F', // Western Michigan
+];
+
 function getSupportedSportMap(bool $includeCustom = true): array {
     global $sportEndpoints, $customSportFeeds;
 
@@ -66,6 +89,95 @@ function getSupportedSportMap(bool $includeCustom = true): array {
     }
 
     return $supported;
+}
+
+function normalizeHexColor(?string $value): ?string {
+    if ($value === null) return null;
+    $trimmed = trim($value);
+    if ($trimmed === '') return null;
+    if ($trimmed[0] === '#') {
+        $trimmed = substr($trimmed, 1);
+    }
+    if (!preg_match('/^[0-9a-fA-F]{6}$/', $trimmed)) {
+        return null;
+    }
+    return '#' . strtoupper($trimmed);
+}
+
+function lookupFallbackTeamColor(?string $teamId): ?string {
+    global $fallbackTeamColors;
+    if ($teamId === null || $teamId === '') return null;
+    return $fallbackTeamColors[(string)$teamId] ?? null;
+}
+
+function getTeamColorBundle(array $team): array {
+    $teamId = isset($team['id']) ? (string)$team['id'] : null;
+
+    $primary = normalizeHexColor($team['color'] ?? null);
+    $alternate = normalizeHexColor($team['alternateColor'] ?? null);
+
+    if ($primary === null) {
+        $primary = lookupFallbackTeamColor($teamId);
+    }
+    if ($primary === null && $alternate !== null) {
+        $primary = $alternate;
+    }
+    if ($primary === null) {
+        $primary = '#FFFFFF';
+    }
+    if ($alternate === null) {
+        $alternate = ($primary === '#FFFFFF') ? '#000000' : '#FFFFFF';
+    }
+
+    return [
+        'primary' => $primary,
+        'alternate' => $alternate,
+    ];
+}
+
+function parseScoreOrNull($score): ?int {
+    if ($score === null) return null;
+    if (is_int($score)) return $score;
+    if (!is_string($score)) return null;
+    $trimmed = trim($score);
+    if ($trimmed === '' || !preg_match('/^-?\d+$/', $trimmed)) return null;
+    return (int)$trimmed;
+}
+
+function scorePresentation(?int $homeScore, ?int $awayScore): array {
+    $neutral = '#FFFFFF';
+    $leading = '#00FF00';
+    $trailing = '#FF0000';
+    $tie = '#FFD700';
+
+    if ($homeScore === null || $awayScore === null) {
+        return [
+            'leader' => 'unknown',
+            'homeScoreColor' => $neutral,
+            'awayScoreColor' => $neutral,
+        ];
+    }
+
+    if ($homeScore > $awayScore) {
+        return [
+            'leader' => 'home',
+            'homeScoreColor' => $leading,
+            'awayScoreColor' => $trailing,
+        ];
+    }
+    if ($awayScore > $homeScore) {
+        return [
+            'leader' => 'away',
+            'homeScoreColor' => $trailing,
+            'awayScoreColor' => $leading,
+        ];
+    }
+
+    return [
+        'leader' => 'tie',
+        'homeScoreColor' => $tie,
+        'awayScoreColor' => $tie,
+    ];
 }
 
 function parseTeamListFile(string $listFile): array {
@@ -348,14 +460,23 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
         }
         if (!$home || !$away) continue;
 
-        $homeName  = $home['team']['displayName'];
-        $awayName  = $away['team']['displayName'];
-        $homeId    = $home['team']['id'] ?? null;
-        $awayId    = $away['team']['id'] ?? null;
-        $homeAbbr  = $home['team']['abbreviation'] ?? '';
-        $awayAbbr  = $away['team']['abbreviation'] ?? '';
+        $homeTeam = $home['team'] ?? [];
+        $awayTeam = $away['team'] ?? [];
+
+        $homeName  = $homeTeam['displayName'] ?? '';
+        $awayName  = $awayTeam['displayName'] ?? '';
+        $homeId    = $homeTeam['id'] ?? null;
+        $awayId    = $awayTeam['id'] ?? null;
+        $homeAbbr  = $homeTeam['abbreviation'] ?? '';
+        $awayAbbr  = $awayTeam['abbreviation'] ?? '';
         $homeScore = $home['score'] ?? '0';
         $awayScore = $away['score'] ?? '0';
+
+        $homeColors = getTeamColorBundle($homeTeam);
+        $awayColors = getTeamColorBundle($awayTeam);
+        $homeScoreNum = parseScoreOrNull($homeScore);
+        $awayScoreNum = parseScoreOrNull($awayScore);
+        $scoreStyling = scorePresentation($homeScoreNum, $awayScoreNum);
 
         $state       = $comp['status']['type']['state']       ?? 'pre';
         $detail      = $comp['status']['type']['detail']      ?? '';
@@ -405,6 +526,11 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
             'link'           => $link,
             'pubDate'        => date(DATE_RSS, strtotime($event['date'] ?? 'now')),
             'league'         => $leagueLabel,
+            'state'          => $state,
+            'isLive'         => ($state === 'in'),
+            'leader'         => $scoreStyling['leader'],
+            'homeScoreColor' => $scoreStyling['homeScoreColor'],
+            'awayScoreColor' => $scoreStyling['awayScoreColor'],
             // expose team metadata for downstream filtering by ID
             'homeTeamName'   => $homeName,
             'awayTeamName'   => $awayName,
@@ -412,6 +538,12 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
             'awayTeamId'     => $awayId,
             'homeTeamAbbrev' => $homeAbbr,
             'awayTeamAbbrev' => $awayAbbr,
+            'homeTeamColor'  => $homeColors['primary'],
+            'awayTeamColor'  => $awayColors['primary'],
+            'homeTeamAltColor' => $homeColors['alternate'],
+            'awayTeamAltColor' => $awayColors['alternate'],
+            'homeScore'      => $homeScoreNum,
+            'awayScore'      => $awayScoreNum,
         ];
     }
 
@@ -442,8 +574,91 @@ function renderRSS(array $items, string $feedTitle): string {
     return $xml;
 }
 
+function renderJSON(array $items, string $feedTitle, string $sport): string {
+    $jsonItems = [];
+    foreach ($items as $item) {
+        $jsonItems[] = [
+            'title' => $item['title'] ?? '',
+            'description' => $item['description'] ?? '',
+            'link' => $item['link'] ?? '',
+            'pubDate' => $item['pubDate'] ?? '',
+            'league' => $item['league'] ?? '',
+            'state' => $item['state'] ?? 'unknown',
+            'isLive' => (bool)($item['isLive'] ?? false),
+            'leader' => $item['leader'] ?? 'unknown',
+            'home' => [
+                'id' => $item['homeTeamId'] ?? null,
+                'name' => $item['homeTeamName'] ?? '',
+                'abbr' => $item['homeTeamAbbrev'] ?? '',
+                'score' => $item['homeScore'] ?? null,
+                'teamColor' => $item['homeTeamColor'] ?? '#FFFFFF',
+                'alternateColor' => $item['homeTeamAltColor'] ?? '#000000',
+                'scoreColor' => $item['homeScoreColor'] ?? '#FFFFFF',
+            ],
+            'away' => [
+                'id' => $item['awayTeamId'] ?? null,
+                'name' => $item['awayTeamName'] ?? '',
+                'abbr' => $item['awayTeamAbbrev'] ?? '',
+                'score' => $item['awayScore'] ?? null,
+                'teamColor' => $item['awayTeamColor'] ?? '#FFFFFF',
+                'alternateColor' => $item['awayTeamAltColor'] ?? '#000000',
+                'scoreColor' => $item['awayScoreColor'] ?? '#FFFFFF',
+            ],
+        ];
+    }
+
+    $payload = [
+        'feedTitle' => $feedTitle,
+        'sport' => $sport,
+        'generatedAt' => gmdate('c'),
+        'itemCount' => count($jsonItems),
+        'items' => $jsonItems,
+    ];
+
+    return json_encode(
+        $payload,
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+    ) . "\n";
+}
+
 function xmlSafe(string $s): string {
     return htmlspecialchars($s, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Fetch one or more sports and output JSON, then exit.
+ * @param string|array $sports  e.g. 'nhl' or ['nhl','nba'] or 'all'
+ */
+function outputJSON($sports = 'all'): void {
+    if ($sports === 'all') {
+        // Keep "all" as the core leagues only to avoid duplicate NCAAF output.
+        $selected = getSupportedSportMap(false);
+        $sportLabel = 'all';
+    } elseif (is_array($sports)) {
+        $supported = getSupportedSportMap(true);
+        $selected = array_intersect_key($supported, array_flip($sports));
+        $sportLabel = 'multiple';
+    } else {
+        $supported = getSupportedSportMap(true);
+        $selected = isset($supported[$sports])
+            ? [$sports => $supported[$sports]]
+            : [];
+        $sportLabel = is_string($sports) ? $sports : 'unknown';
+    }
+
+    $allItems = [];
+    foreach ($selected as $ep) {
+        $items = fetchScoreboard($ep['url'], $ep['label']);
+        $items = applyFeedFilter($items, $ep['filter'] ?? null);
+        $allItems = array_merge($allItems, $items);
+    }
+
+    $labels = array_column($selected, 'label');
+    $feedTitle = 'ESPN Scores — ' . implode(', ', $labels);
+
+    header('Content-Type: application/json; charset=UTF-8');
+    echo renderJSON($allItems, $feedTitle, $sportLabel);
+    exit;
 }
 
 /**
