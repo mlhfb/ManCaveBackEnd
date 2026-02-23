@@ -34,6 +34,11 @@ Big10 filter regression:
 php html/test_ncaaf_filter.php
 ```
 
+Endpoint format regression:
+```powershell
+php html/test_endpoint_formats.php
+```
+
 Team list generation:
 - PowerShell generator:
 ```powershell
@@ -50,10 +55,12 @@ CI
 - Current CI checks:
 - PHP setup and runtime info
 - `html/test_ncaaf_filter.php`
+- `html/test_endpoint_formats.php`
 - Upload test output artifact
 
 Notes
 -----
 - `html/ncaaf.php` intentionally returns the filtered `big10` feed.
+- `html/espn_scores_rss.php` routes `format=rss` and `format=json` before emitting static HTML.
 - ESPN endpoint structure can change; keep parsing defensive.
 - Legacy scroller clients expect simple RSS fields (`title`, `description`, `pubDate`).

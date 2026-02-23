@@ -8,6 +8,7 @@ Core files
 - `html/espn_scores_rss.php`: preview/dispatcher endpoint with `sport` and `format` query args.
 - `html/ncaaf.php`: legacy alias endpoint that calls `outputRSS('big10')`.
 - `html/test_ncaaf_filter.php`: filter-path regression script.
+- `html/test_endpoint_formats.php`: endpoint output-shape regression script.
 
 Sport maps
 - Base sports are defined in `$sportEndpoints`.
@@ -26,6 +27,7 @@ Output contracts
 - RSS:
 - Rendered via `renderRSS()`
 - Item keys: title, description, link, league/category, pubDate
+- `format=rss` dispatches before any static HTML in `espn_scores_rss.php`
 
 - JSON:
 - Rendered via `renderJSON()`
@@ -33,6 +35,7 @@ Output contracts
 - Top-level: `feedTitle`, `sport`, `generatedAt`, `itemCount`, `items`
 - Item-level: `state`, `isLive`, `leader`, `home`, `away`
 - Team-level colors are exposed (`teamColor`, `alternateColor`, `scoreColor`)
+- `format=json` dispatches before any static HTML in `espn_scores_rss.php`
 
 Formatting logic
 - Title:
@@ -51,6 +54,7 @@ Color logic
 CI and local checks
 - Workflow: `.github/workflows/ncaaf-filter-test.yml`
 - Local command: `php html/test_ncaaf_filter.php`
+- Local command: `php html/test_endpoint_formats.php`
 
 Documentation expectations
 - Keep `README.md`, `DEVELOPMENT.md`, `CHANGELOG.md`, and `examples/` aligned with code behavior.

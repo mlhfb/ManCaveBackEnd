@@ -28,6 +28,7 @@ Primary preview/dispatcher endpoint:
 Query parameters:
 - `sport`: one of the keys above.
 - `format`: `html` (default), `rss`, or `json`.
+- For `format=rss` and `format=json`, routing runs before any static HTML is written, so the response body is machine-only.
 
 Examples:
 - HTML preview: `/html/espn_scores_rss.php?sport=nhl`
@@ -108,6 +109,11 @@ Testing
 Run the Big10 filter test harness:
 ```powershell
 php html/test_ncaaf_filter.php
+```
+
+Run the endpoint-format regression checks:
+```powershell
+php html/test_endpoint_formats.php
 ```
 
 See also

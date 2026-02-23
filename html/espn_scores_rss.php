@@ -1,3 +1,16 @@
+<?php
+require_once __DIR__ . '/espn_scores_common.php';
+
+$sport = $_GET['sport'] ?? '';
+$format = strtolower((string)($_GET['format'] ?? 'html'));
+
+if ($sport !== '' && $format === 'rss') {
+    outputRSS($sport);
+}
+if ($sport !== '' && $format === 'json') {
+    outputJSON($sport);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,22 +58,10 @@
 </div>
 
 <?php
-require_once __DIR__ . '/espn_scores_common.php';
-
 $sport  = $_GET['sport']  ?? '';
-$format = $_GET['format'] ?? 'html';
 $supportedSports = getSupportedSportMap(true);
 
 if ($sport !== '') {
-    // If RSS/JSON format requested, use shared helpers and exit.
-    if ($format === 'rss') {
-        outputRSS($sport);
-        // outputRSS calls exit, so nothing below runs
-    } elseif ($format === 'json') {
-        outputJSON($sport);
-        // outputJSON calls exit, so nothing below runs
-    }
-
     // Determine which sports to fetch for HTML preview
     if ($sport === 'all') {
         $selected = getSupportedSportMap(false);

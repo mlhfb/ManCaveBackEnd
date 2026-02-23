@@ -4,6 +4,9 @@ All notable changes to this project are tracked here.
 
 Unreleased
 ----------
+- Moved machine-format routing (`format=rss`, `format=json`) to run before static HTML in `html/espn_scores_rss.php`.
+- Added `html/test_endpoint_formats.php` to assert `format=rss` XML/RSS output shape and `format=json` JSON output shape.
+- Updated `.github/workflows/ncaaf-filter-test.yml` to run endpoint format checks in CI and upload both test artifacts.
 - Added/kept Big Ten filtered feed support via `sport=big10`.
 - Kept `html/ncaaf.php` as a legacy alias of the filtered `big10` feed.
 - Added richer game metadata and styling helpers in `espn_scores_common.php`:

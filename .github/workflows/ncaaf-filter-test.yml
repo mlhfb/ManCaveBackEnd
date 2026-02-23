@@ -1,4 +1,4 @@
-name: NCAAF filter test
+name: NCAAF filter + endpoint format tests
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   test_ncaaf_filter:
-    name: Run NCAAF filter test
+    name: Run NCAAF filter and endpoint format tests
     runs-on: ubuntu-latest
 
     steps:
@@ -30,8 +30,14 @@ jobs:
       run: |
         php html/test_ncaaf_filter.php | tee ncaaf-test-output.txt
 
+    - name: Run endpoint format regression checks
+      run: |
+        php html/test_endpoint_formats.php | tee endpoint-format-output.txt
+
     - name: Upload results
       uses: actions/upload-artifact@v4
       with:
-        name: ncaaf-test-output
-        path: ncaaf-test-output.txt
+        name: php-test-output
+        path: |
+          ncaaf-test-output.txt
+          endpoint-format-output.txt
