@@ -18,8 +18,14 @@ struct site_t sites[] = {
   // {"NCAA FB", "https://" HOST "/html/ncaaf.php", ncaaf},
   // optional: a combined feed
   {"All Sports", "https://" HOST "/html/espn_scores_rss.php?sport=all&format=rss", npr}
+  // optional: JSON endpoint for debugging/integration tooling
+  // {"All Sports JSON", "https://" HOST "/html/espn_scores_rss.php?sport=all&format=json", npr}
 };
 
 // Notes
 - Use `http://` if your host does not have TLS. The ESP client must be able to reach the host.
 - The Arduino code expects simple RSS with `<item><title>`, `<description>`, and `<pubDate>` tags produced by the PHP scripts.
+- Current title format is compact for scrollers:
+  - Pregame: `Away @ Home`
+  - Live/Final: `Away 22 @ Home 30`
+- Live descriptions are normalized by sport (clock/quarter, period, inning phrasing).

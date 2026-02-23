@@ -18,8 +18,13 @@ Example inactive line:
 Where this list is used
 - `sport=big10` in `html/espn_scores_rss.php`
 - `html/ncaaf.php` (legacy endpoint aliasing the same filtered feed)
+- `html/test_ncaaf_filter.php` (CI/local validation of filtered output)
 
 How to update teams
 1. Find the ESPN team id (`tools/generate_ncaateams.ps1` can help).
 2. Add `id,displayName` to `html/ncaateams.list`.
 3. Prefix with `#` to disable a team.
+
+Notes
+- Filtering in code prefers explicit IDs and falls back to name matching only if IDs are not present.
+- The default active set is intended for a Big Ten focused feed plus selected extras.

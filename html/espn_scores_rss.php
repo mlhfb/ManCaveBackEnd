@@ -52,7 +52,7 @@ $format = $_GET['format'] ?? 'html';
 $supportedSports = getSupportedSportMap(true);
 
 if ($sport !== '') {
-    // If RSS format requested, use the shared helper and exit
+    // If RSS/JSON format requested, use shared helpers and exit.
     if ($format === 'rss') {
         outputRSS($sport);
         // outputRSS calls exit, so nothing below runs

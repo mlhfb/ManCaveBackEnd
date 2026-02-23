@@ -1,20 +1,23 @@
 # TODO / Wishlist
 
-This project is small and personal—here are next improvements and wishlist items.
+Potential next improvements:
 
-- teams_admin UI: add `html/teams_admin.php` — web UI to toggle teams in `html/ncaateams.list`.
-  - Auth: simple shared `ADMIN_TOKEN` env var checked on POST (recommended).
-  - Server should validate `id,displayName` lines and write atomically, keeping a `.bak`.
-  - Rationale: makes enabling/disabling teams easier for non-technical users.
+- Add `html/teams_admin.php`:
+  - Web UI to enable/disable teams in `html/ncaateams.list`
+  - Token-protected POST updates (`ADMIN_TOKEN`)
+  - Validate `id,displayName` format and write atomically with backup
 
-- Persist canonical name→ESPN-ID mapping file (optional): allow `ncaateams.list` to accept names or IDs.
+- Add optional date override passthrough for testing:
+  - Example target: `?sport=big10&format=rss&dates=20240907`
+  - Would make off-season/daytime validation easier for scroller devices
 
-- CI: add strict checks to fail when filtered items == 0 (already implemented in test).
+- Add canned fixture tests for feed formatting:
+  - Verify title output (`Team A 22 @ Team B 30`)
+  - Verify sport-specific in-progress wording normalization
 
-- Cleanup: expose an endpoint or script to list current ESPN team IDs (we added `tools/generate_ncaateams.ps1`).
+- Add endpoint-level smoke tests for all sports:
+  - `nhl`, `nba`, `mlb`, `nfl`, `ncaaf`, `big10`
 
 Notes:
-- Currently `html/ncaateams.list` contains numeric `id,displayName` lines; non-active teams are commented out with `#`.
-- I noticed `127,Michigan State Spartans` is commented out in the list; keep or enable as needed.
-
-If you'd like, I can implement the `teams_admin.php` page next (token-auth protected). Otherwise this TODO documents the idea.
+- Team list tooling already exists: `tools/generate_ncaateams.ps1` and `html/generate_ncaateams_list.php`.
+- Current CI validates the filtered `big10`/NCAAF path via `html/test_ncaaf_filter.php`.
