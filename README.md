@@ -47,7 +47,7 @@ Output formats
 --------------
 RSS:
 - Standard RSS 2.0 channel
-- `<item>` includes `title`, `description`, `link`, `category`, `pubDate`
+- `<item>` includes `title`, `link`, `category`, `pubDate` (`description` is intentionally omitted)
 - RSS item `title` is scroller-optimized: `@` is replaced with `at`, then six spaces, then the status/detail text.
 
 JSON:

@@ -26,7 +26,7 @@ Filter model
 Output contracts
 - RSS:
 - Rendered via `renderRSS()`
-- Item keys: title, description, link, league/category, pubDate
+- Item keys: title, link, league/category, pubDate (`description` omitted on purpose)
 - RSS item titles are scroller-optimized (`@` -> `at`, then six spaces, then detail text).
 - `format=rss` dispatches before any static HTML in `espn_scores_rss.php`
 

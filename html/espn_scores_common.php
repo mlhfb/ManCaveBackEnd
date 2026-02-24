@@ -567,7 +567,6 @@ function renderRSS(array $items, string $feedTitle): string {
 
         $xml .= "  <item>\n";
         $xml .= "    <title>"       . xmlSafe($scrollTitle)         . "</title>\n";
-        $xml .= "    <description>" . xmlSafe($item['description']) . "</description>\n";
         $xml .= "    <link>"        . xmlSafe($item['link'])        . "</link>\n";
         $xml .= "    <category>"    . xmlSafe($item['league'])      . "</category>\n";
         $xml .= "    <pubDate>"     . $item['pubDate']              . "</pubDate>\n";

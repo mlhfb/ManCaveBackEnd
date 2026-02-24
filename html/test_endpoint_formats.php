@@ -109,17 +109,16 @@ if (!str_starts_with($rssBody, '<?xml')) {
 if (strpos($rssBody, '<rss version="2.0">') === false || strpos($rssBody, '<channel>') === false) {
     fail('RSS body does not contain expected rss/channel tags');
 }
-if (preg_match('/<item>.*?<title>(.*?)<\/title>.*?<description>(.*?)<\/description>/s', $rssBody, $m) === 1) {
+if (preg_match('/<item>.*?<title>(.*?)<\/title>/s', $rssBody, $m) === 1) {
     $rssTitle = (string)$m[1];
-    $rssDesc = (string)$m[2];
     if (strpos($rssTitle, ' @ ') !== false) {
         fail("RSS item title should use 'at' instead of '@'");
     }
     if (strpos($rssTitle, '      ') === false) {
         fail('RSS item title missing expected six-space separator');
     }
-    if (trim($rssDesc) !== '' && strpos($rssTitle, $rssDesc) === false) {
-        fail('RSS item title should include description/detail text');
+    if (preg_match('/<item>.*?<description>/s', $rssBody) === 1) {
+        fail('RSS item should not include a description element');
     }
 }
 
