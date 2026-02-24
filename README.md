@@ -50,11 +50,11 @@ RSS:
 - `<item>` includes `title`, `description`, `link`, `category`, `pubDate`
 
 JSON:
-- Top-level: `feedTitle`, `sport`, `generatedAt`, `itemCount`, `items`
-- Per item: `title`, `description`, `link`, `pubDate`, `league`, `state`, `isLive`, `leader`
+- Top-level: `sport`, `items`
+- Per item: `league`, `state`, `isLive`, `leader`, `detail`
 - Team objects:
-- `home`: `id`, `name`, `abbr`, `score`, `teamColor`, `alternateColor`, `scoreColor`
-- `away`: `id`, `name`, `abbr`, `score`, `teamColor`, `alternateColor`, `scoreColor`
+- `home`: `name`, `score`, `teamColor`, `alternateColor`, `scoreColor`
+- `away`: `name`, `score`, `teamColor`, `alternateColor`, `scoreColor`
 
 Formatting behavior
 -------------------

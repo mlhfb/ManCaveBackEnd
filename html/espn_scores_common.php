@@ -574,31 +574,24 @@ function renderRSS(array $items, string $feedTitle): string {
     return $xml;
 }
 
-function renderJSON(array $items, string $feedTitle, string $sport): string {
+function renderJSON(array $items, string $sport): string {
     $jsonItems = [];
     foreach ($items as $item) {
         $jsonItems[] = [
-            'title' => $item['title'] ?? '',
-            'description' => $item['description'] ?? '',
-            'link' => $item['link'] ?? '',
-            'pubDate' => $item['pubDate'] ?? '',
             'league' => $item['league'] ?? '',
             'state' => $item['state'] ?? 'unknown',
             'isLive' => (bool)($item['isLive'] ?? false),
             'leader' => $item['leader'] ?? 'unknown',
+            'detail' => $item['description'] ?? '',
             'home' => [
-                'id' => $item['homeTeamId'] ?? null,
                 'name' => $item['homeTeamName'] ?? '',
-                'abbr' => $item['homeTeamAbbrev'] ?? '',
                 'score' => $item['homeScore'] ?? null,
                 'teamColor' => $item['homeTeamColor'] ?? '#FFFFFF',
                 'alternateColor' => $item['homeTeamAltColor'] ?? '#000000',
                 'scoreColor' => $item['homeScoreColor'] ?? '#FFFFFF',
             ],
             'away' => [
-                'id' => $item['awayTeamId'] ?? null,
                 'name' => $item['awayTeamName'] ?? '',
-                'abbr' => $item['awayTeamAbbrev'] ?? '',
                 'score' => $item['awayScore'] ?? null,
                 'teamColor' => $item['awayTeamColor'] ?? '#FFFFFF',
                 'alternateColor' => $item['awayTeamAltColor'] ?? '#000000',
@@ -608,16 +601,13 @@ function renderJSON(array $items, string $feedTitle, string $sport): string {
     }
 
     $payload = [
-        'feedTitle' => $feedTitle,
         'sport' => $sport,
-        'generatedAt' => gmdate('c'),
-        'itemCount' => count($jsonItems),
         'items' => $jsonItems,
     ];
 
     return json_encode(
         $payload,
-        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
     ) . "\n";
 }
 
@@ -652,12 +642,8 @@ function outputJSON($sports = 'all'): void {
         $items = applyFeedFilter($items, $ep['filter'] ?? null);
         $allItems = array_merge($allItems, $items);
     }
-
-    $labels = array_column($selected, 'label');
-    $feedTitle = 'ESPN Scores — ' . implode(', ', $labels);
-
     header('Content-Type: application/json; charset=UTF-8');
-    echo renderJSON($allItems, $feedTitle, $sportLabel);
+    echo renderJSON($allItems, $sportLabel);
     exit;
 }
 
@@ -687,7 +673,7 @@ function outputRSS($sports = 'all'): void {
     }
 
     $labels = array_column($selected, 'label');
-    $feedTitle = 'ESPN Scores — ' . implode(', ', $labels);
+    $feedTitle = 'ESPN Scores - ' . implode(', ', $labels);
 
     header('Content-Type: application/rss+xml; charset=UTF-8');
     echo renderRSS($allItems, $feedTitle);

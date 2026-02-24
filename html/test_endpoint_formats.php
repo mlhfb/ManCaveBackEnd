@@ -125,7 +125,7 @@ $payload = json_decode($jsonBody, true);
 if (!is_array($payload)) {
     fail('JSON body is not valid JSON object');
 }
-foreach (['feedTitle', 'sport', 'generatedAt', 'itemCount', 'items'] as $requiredKey) {
+foreach (['sport', 'items'] as $requiredKey) {
     if (!array_key_exists($requiredKey, $payload)) {
         fail("JSON body missing key '{$requiredKey}'");
     }
@@ -133,8 +133,28 @@ foreach (['feedTitle', 'sport', 'generatedAt', 'itemCount', 'items'] as $require
 if (!is_array($payload['items'])) {
     fail("JSON 'items' key is not an array");
 }
-if (!is_int($payload['itemCount'])) {
-    fail("JSON 'itemCount' key is not an integer");
+if (array_key_exists('generatedAt', $payload)) {
+    fail("JSON payload still includes 'generatedAt'");
+}
+
+if (!empty($payload['items'])) {
+    $first = $payload['items'][0];
+    foreach (['league', 'state', 'isLive', 'leader', 'detail', 'home', 'away'] as $requiredGameKey) {
+        if (!array_key_exists($requiredGameKey, $first)) {
+            fail("JSON game object missing key '{$requiredGameKey}'");
+        }
+    }
+    if (!is_array($first['home']) || !is_array($first['away'])) {
+        fail("JSON game object has invalid home/away structure");
+    }
+    foreach (['name', 'score', 'teamColor', 'alternateColor', 'scoreColor'] as $requiredTeamKey) {
+        if (!array_key_exists($requiredTeamKey, $first['home']) || !array_key_exists($requiredTeamKey, $first['away'])) {
+            fail("JSON team objects missing key '{$requiredTeamKey}'");
+        }
+    }
+    if (array_key_exists('abbr', $first['home']) || array_key_exists('abbr', $first['away'])) {
+        fail("JSON team objects should not include 'abbr'");
+    }
 }
 
 echo "RSS shape check passed\n";

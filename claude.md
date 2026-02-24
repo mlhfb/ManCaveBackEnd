@@ -32,9 +32,9 @@ Output contracts
 - JSON:
 - Rendered via `renderJSON()`
 - Includes game state metadata and team objects:
-- Top-level: `feedTitle`, `sport`, `generatedAt`, `itemCount`, `items`
-- Item-level: `state`, `isLive`, `leader`, `home`, `away`
-- Team-level colors are exposed (`teamColor`, `alternateColor`, `scoreColor`)
+- Top-level: `sport`, `items`
+- Item-level: `league`, `state`, `isLive`, `leader`, `detail`, `home`, `away`
+- Team-level fields: `name`, `score`, `teamColor`, `alternateColor`, `scoreColor`
 - `format=json` dispatches before any static HTML in `espn_scores_rss.php`
 
 Formatting logic

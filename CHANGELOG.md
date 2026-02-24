@@ -4,6 +4,8 @@ All notable changes to this project are tracked here.
 
 Unreleased
 ----------
+- Simplified JSON payload for ESP32 clients: removed `generatedAt` and legacy RSS-style fields (`title`, `description`, `link`, `pubDate`) from JSON items.
+- JSON team objects now use full `name` (no `abbr`) while retaining `teamColor`, `alternateColor`, and `scoreColor`.
 - Moved machine-format routing (`format=rss`, `format=json`) to run before static HTML in `html/espn_scores_rss.php`.
 - Added `html/test_endpoint_formats.php` to assert `format=rss` XML/RSS output shape and `format=json` JSON output shape.
 - Updated `.github/workflows/ncaaf-filter-test.yml` to run endpoint format checks in CI and upload both test artifacts.
