@@ -561,8 +561,12 @@ function renderRSS(array $items, string $feedTitle): string {
     $xml .= "  <lastBuildDate>$buildDate</lastBuildDate>\n";
 
     foreach ($items as $item) {
+        $baseTitle = str_replace(' @ ', ' at ', (string)($item['title'] ?? ''));
+        $detail = (string)($item['description'] ?? '');
+        $scrollTitle = rtrim($baseTitle) . '      ' . $detail;
+
         $xml .= "  <item>\n";
-        $xml .= "    <title>"       . xmlSafe($item['title'])       . "</title>\n";
+        $xml .= "    <title>"       . xmlSafe($scrollTitle)         . "</title>\n";
         $xml .= "    <description>" . xmlSafe($item['description']) . "</description>\n";
         $xml .= "    <link>"        . xmlSafe($item['link'])        . "</link>\n";
         $xml .= "    <category>"    . xmlSafe($item['league'])      . "</category>\n";
@@ -579,7 +583,6 @@ function renderJSON(array $items, string $sport): string {
     foreach ($items as $item) {
         $jsonItems[] = [
             'league' => $item['league'] ?? '',
-            'state' => $item['state'] ?? 'unknown',
             'isLive' => (bool)($item['isLive'] ?? false),
             'leader' => $item['leader'] ?? 'unknown',
             'detail' => $item['description'] ?? '',

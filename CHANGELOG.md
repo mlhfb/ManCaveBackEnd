@@ -4,6 +4,8 @@ All notable changes to this project are tracked here.
 
 Unreleased
 ----------
+- Updated RSS item title rendering for scrollers: replaced `@` with `at`, added six spaces, and appended the item detail text.
+- Removed `state` from JSON game objects while keeping `isLive`.
 - Simplified JSON payload for ESP32 clients: removed `generatedAt` and legacy RSS-style fields (`title`, `description`, `link`, `pubDate`) from JSON items.
 - JSON team objects now use full `name` (no `abbr`) while retaining `teamColor`, `alternateColor`, and `scoreColor`.
 - Moved machine-format routing (`format=rss`, `format=json`) to run before static HTML in `html/espn_scores_rss.php`.

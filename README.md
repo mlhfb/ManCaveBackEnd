@@ -48,10 +48,11 @@ Output formats
 RSS:
 - Standard RSS 2.0 channel
 - `<item>` includes `title`, `description`, `link`, `category`, `pubDate`
+- RSS item `title` is scroller-optimized: `@` is replaced with `at`, then six spaces, then the status/detail text.
 
 JSON:
 - Top-level: `sport`, `items`
-- Per item: `league`, `state`, `isLive`, `leader`, `detail`
+- Per item: `league`, `isLive`, `leader`, `detail`
 - Team objects:
 - `home`: `name`, `score`, `teamColor`, `alternateColor`, `scoreColor`
 - `away`: `name`, `score`, `teamColor`, `alternateColor`, `scoreColor`

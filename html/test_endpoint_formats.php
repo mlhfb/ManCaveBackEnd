@@ -109,6 +109,19 @@ if (!str_starts_with($rssBody, '<?xml')) {
 if (strpos($rssBody, '<rss version="2.0">') === false || strpos($rssBody, '<channel>') === false) {
     fail('RSS body does not contain expected rss/channel tags');
 }
+if (preg_match('/<item>.*?<title>(.*?)<\/title>.*?<description>(.*?)<\/description>/s', $rssBody, $m) === 1) {
+    $rssTitle = (string)$m[1];
+    $rssDesc = (string)$m[2];
+    if (strpos($rssTitle, ' @ ') !== false) {
+        fail("RSS item title should use 'at' instead of '@'");
+    }
+    if (strpos($rssTitle, '      ') === false) {
+        fail('RSS item title missing expected six-space separator');
+    }
+    if (trim($rssDesc) !== '' && strpos($rssTitle, $rssDesc) === false) {
+        fail('RSS item title should include description/detail text');
+    }
+}
 
 $json = httpGet("{$baseUrl}/espn_scores_rss.php?sport=nfl&format=json");
 if ($json['status'] !== 200) {
@@ -139,10 +152,13 @@ if (array_key_exists('generatedAt', $payload)) {
 
 if (!empty($payload['items'])) {
     $first = $payload['items'][0];
-    foreach (['league', 'state', 'isLive', 'leader', 'detail', 'home', 'away'] as $requiredGameKey) {
+    foreach (['league', 'isLive', 'leader', 'detail', 'home', 'away'] as $requiredGameKey) {
         if (!array_key_exists($requiredGameKey, $first)) {
             fail("JSON game object missing key '{$requiredGameKey}'");
         }
+    }
+    if (array_key_exists('state', $first)) {
+        fail("JSON game object should not include 'state'");
     }
     if (!is_array($first['home']) || !is_array($first['away'])) {
         fail("JSON game object has invalid home/away structure");

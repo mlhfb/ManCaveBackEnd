@@ -27,13 +27,14 @@ Output contracts
 - RSS:
 - Rendered via `renderRSS()`
 - Item keys: title, description, link, league/category, pubDate
+- RSS item titles are scroller-optimized (`@` -> `at`, then six spaces, then detail text).
 - `format=rss` dispatches before any static HTML in `espn_scores_rss.php`
 
 - JSON:
 - Rendered via `renderJSON()`
 - Includes game state metadata and team objects:
 - Top-level: `sport`, `items`
-- Item-level: `league`, `state`, `isLive`, `leader`, `detail`, `home`, `away`
+- Item-level: `league`, `isLive`, `leader`, `detail`, `home`, `away`
 - Team-level fields: `name`, `score`, `teamColor`, `alternateColor`, `scoreColor`
 - `format=json` dispatches before any static HTML in `espn_scores_rss.php`
 
