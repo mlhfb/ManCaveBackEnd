@@ -67,6 +67,168 @@ $fallbackTeamColors = [
     '2711' => '#532E1F', // Western Michigan
 ];
 
+// LED-optimized team color overrides.
+// Keys: '<leagueLabel>:<espnTeamId>' — leagueLabel matches the string passed to fetchScoreboard().
+// Colors are chosen for readability as TEXT on a black 8×128 addressable RGB LED panel.
+// Dark primaries (navy, maroon, forest green, near-black) are replaced with bright accents.
+$ledTeamColors = [
+    // ── NCAA Football (Big10 + active non-conference teams) ───────────────
+    // IDs sourced from ncaateams.list
+    'NCAA Football:356'  => '#FF5F05', // Illinois — orange
+    'NCAA Football:84'   => '#E31837', // Indiana — bright crimson (was #970310 too dark)
+    'NCAA Football:2294' => '#FFCD00', // Iowa — Hawkeye gold (was #231F20 near-black!)
+    'NCAA Football:120'  => '#E03A3E', // Maryland — bright red
+    'NCAA Football:127'  => '#18A558', // Michigan State — bright green (was #173F35 too dark)
+    'NCAA Football:130'  => '#FFCB05', // Michigan — maize gold (was #00274C navy unreadable)
+    'NCAA Football:135'  => '#FFD700', // Minnesota — gold accent (was #5E0A2F maroon too dark)
+    'NCAA Football:158'  => '#FF2244', // Nebraska — bright scarlet
+    'NCAA Football:77'   => '#836ECC', // Northwestern — medium purple (was #492F92 too dark)
+    'NCAA Football:194'  => '#E51837', // Ohio State — bright scarlet
+    'NCAA Football:213'  => '#0099FF', // Penn State — bright blue (was #061440 near-black!)
+    'NCAA Football:2509' => '#FFD700', // Purdue — bright gold (was #CEB888 muted sand)
+    'NCAA Football:164'  => '#FF3333', // Rutgers — bright scarlet
+    'NCAA Football:275'  => '#E00034', // Wisconsin — bright cardinal red (was #A00000 too dark)
+    'NCAA Football:2117' => '#D4A854', // Central Michigan — gold (was #4C0027 near-black)
+    'NCAA Football:2711' => '#D4A854', // Western Michigan — gold (was #532E1F too dark)
+    // New Big10 members (IDs from ncaateams.list; activate in list to use)
+    'NCAA Football:2483' => '#00CC66', // Oregon — bright green (was #154733 too dark)
+    'NCAA Football:26'   => '#FFB300', // UCLA — bright gold (navy too dark)
+    'NCAA Football:30'   => '#CC2200', // USC — bright cardinal red (was #990000 too dark)
+    'NCAA Football:264'  => '#9933FF', // Washington — bright purple (was #4B2E83 too dark)
+
+    // ── NFL ──────────────────────────────────────────────────────────────
+    'NFL:22' => '#E00040', // Arizona Cardinals — bright cardinal red
+    'NFL:1'  => '#E81B23', // Atlanta Falcons — bright red (navy too dark)
+    'NFL:33' => '#9155E3', // Baltimore Ravens — bright purple (dark purple too dark)
+    'NFL:2'  => '#0080FF', // Buffalo Bills — bright blue (navy too dark)
+    'NFL:29' => '#00A0DD', // Carolina Panthers — process blue
+    'NFL:3'  => '#E85C2C', // Chicago Bears — bright orange (navy too dark)
+    'NFL:4'  => '#FF6600', // Cincinnati Bengals — bright orange
+    'NFL:5'  => '#FF6000', // Cleveland Browns — bright orange
+    'NFL:6'  => '#A8C8FF', // Dallas Cowboys — silver-blue accent (navy too dark)
+    'NFL:7'  => '#FF6600', // Denver Broncos — bright orange
+    'NFL:8'  => '#0099FF', // Detroit Lions — bright blue
+    'NFL:9'  => '#FFB612', // Green Bay Packers — gold
+    'NFL:34' => '#E00030', // Houston Texans — battle red
+    'NFL:11' => '#0055CC', // Indianapolis Colts — bright blue (navy too dark)
+    'NFL:30' => '#00C0D8', // Jacksonville Jaguars — bright teal
+    'NFL:12' => '#E31837', // Kansas City Chiefs — bright red
+    'NFL:13' => '#C0C0C0', // Las Vegas Raiders — silver (black too dark)
+    'NFL:24' => '#0099FF', // Los Angeles Chargers — bright powder blue
+    'NFL:14' => '#FFA300', // Los Angeles Rams — bright gold
+    'NFL:15' => '#00C0CC', // Miami Dolphins — bright teal
+    'NFL:16' => '#9933FF', // Minnesota Vikings — bright purple
+    'NFL:17' => '#0055FF', // New England Patriots — bright blue (navy too dark)
+    'NFL:18' => '#D4AF37', // New Orleans Saints — gold
+    'NFL:19' => '#0055FF', // New York Giants — bright blue
+    'NFL:20' => '#00CC66', // New York Jets — bright green
+    'NFL:21' => '#0099AA', // Philadelphia Eagles — bright midnight green
+    'NFL:23' => '#FFB612', // Pittsburgh Steelers — gold
+    'NFL:25' => '#E00000', // San Francisco 49ers — bright scarlet
+    'NFL:26' => '#69BE28', // Seattle Seahawks — action green
+    'NFL:27' => '#E00000', // Tampa Bay Buccaneers — bright red
+    'NFL:10' => '#0099FF', // Tennessee Titans — bright blue
+    'NFL:28' => '#FFB612', // Washington Commanders — gold
+
+    // ── NBA ──────────────────────────────────────────────────────────────
+    'NBA:1'  => '#FF5544', // Atlanta Hawks — bright red
+    'NBA:2'  => '#00CC66', // Boston Celtics — bright green
+    'NBA:17' => '#FFFFFF', // Brooklyn Nets — white (black too dark)
+    'NBA:30' => '#00C8FF', // Charlotte Hornets — bright cyan
+    'NBA:4'  => '#FF3333', // Chicago Bulls — bright red
+    'NBA:5'  => '#D4AF37', // Cleveland Cavaliers — gold accent
+    'NBA:6'  => '#0077FF', // Dallas Mavericks — bright blue
+    'NBA:7'  => '#FFD700', // Denver Nuggets — gold
+    'NBA:8'  => '#FF3333', // Detroit Pistons — bright red
+    'NBA:9'  => '#FFD700', // Golden State Warriors — gold
+    'NBA:10' => '#FF3333', // Houston Rockets — bright red
+    'NBA:11' => '#FFD700', // Indiana Pacers — gold accent
+    'NBA:12' => '#FF3333', // LA Clippers — bright red
+    'NBA:13' => '#9933FF', // Los Angeles Lakers — bright purple
+    'NBA:29' => '#6699FF', // Memphis Grizzlies — bright steel blue
+    'NBA:14' => '#FF3333', // Miami Heat — bright red
+    'NBA:15' => '#00CC66', // Milwaukee Bucks — bright green
+    'NBA:16' => '#0099FF', // Minnesota Timberwolves — bright blue
+    'NBA:3'  => '#0099FF', // New Orleans Pelicans — bright blue
+    'NBA:18' => '#0099FF', // New York Knicks — bright blue
+    'NBA:25' => '#FF6600', // Oklahoma City Thunder — orange accent
+    'NBA:19' => '#0099FF', // Orlando Magic — bright blue
+    'NBA:20' => '#0099FF', // Philadelphia 76ers — bright blue
+    'NBA:21' => '#FF6600', // Phoenix Suns — bright orange
+    'NBA:22' => '#FF3333', // Portland Trail Blazers — bright red
+    'NBA:23' => '#9933FF', // Sacramento Kings — bright purple
+    'NBA:24' => '#C0C0C0', // San Antonio Spurs — silver
+    'NBA:28' => '#FF3333', // Toronto Raptors — bright red
+    'NBA:26' => '#0099FF', // Utah Jazz — bright blue
+    'NBA:27' => '#FF3333', // Washington Wizards — bright red
+
+    // ── MLB ──────────────────────────────────────────────────────────────
+    'MLB:29' => '#E81B23', // Arizona Diamondbacks — bright red (purple too dark)
+    'MLB:11' => '#00CC66', // Athletics — bright green (dark green too dark)
+    'MLB:15' => '#FF3333', // Atlanta Braves — bright red
+    'MLB:1'  => '#FF6600', // Baltimore Orioles — bright orange
+    'MLB:2'  => '#FF3333', // Boston Red Sox — bright red
+    'MLB:16' => '#0099FF', // Chicago Cubs — bright blue (navy too dark)
+    'MLB:4'  => '#C0C0C0', // Chicago White Sox — silver (black too dark)
+    'MLB:17' => '#FF3333', // Cincinnati Reds — bright red
+    'MLB:5'  => '#FF3333', // Cleveland Guardians — bright red
+    'MLB:27' => '#9933FF', // Colorado Rockies — bright purple
+    'MLB:6'  => '#0099FF', // Detroit Tigers — bright blue (navy too dark)
+    'MLB:18' => '#FF8833', // Houston Astros — bright orange
+    'MLB:7'  => '#0099FF', // Kansas City Royals — bright blue (navy too dark)
+    'MLB:3'  => '#FF3333', // Los Angeles Angels — bright red
+    'MLB:19' => '#0099FF', // Los Angeles Dodgers — bright blue (navy too dark)
+    'MLB:28' => '#0099FF', // Miami Marlins — bright blue
+    'MLB:8'  => '#FFD700', // Milwaukee Brewers — gold accent
+    'MLB:9'  => '#0099FF', // Minnesota Twins — bright blue (navy too dark)
+    'MLB:21' => '#0099FF', // New York Mets — bright blue (navy too dark)
+    'MLB:10' => '#0099FF', // New York Yankees — bright blue (navy too dark)
+    'MLB:22' => '#FF3333', // Philadelphia Phillies — bright red
+    'MLB:23' => '#FFD700', // Pittsburgh Pirates — gold (black too dark)
+    'MLB:25' => '#FFD700', // San Diego Padres — gold/sand accent
+    'MLB:26' => '#FF6600', // San Francisco Giants — bright orange
+    'MLB:12' => '#0099FF', // Seattle Mariners — bright blue
+    'MLB:24' => '#FF3333', // St. Louis Cardinals — bright red
+    'MLB:30' => '#0099FF', // Tampa Bay Rays — bright blue (navy too dark)
+    'MLB:13' => '#0099FF', // Texas Rangers — bright blue (navy too dark)
+    'MLB:14' => '#0099FF', // Toronto Blue Jays — bright blue
+    'MLB:20' => '#FF3333', // Washington Nationals — bright red
+
+    // ── NHL ──────────────────────────────────────────────────────────────
+    'NHL:25'     => '#FF9933',  // Anaheim Ducks — bright orange
+    'NHL:1'      => '#FFD700',  // Boston Bruins — gold
+    'NHL:2'      => '#0099FF',  // Buffalo Sabres — bright blue (navy too dark)
+    'NHL:3'      => '#FF3333',  // Calgary Flames — bright red
+    'NHL:7'      => '#FF3333',  // Carolina Hurricanes — bright red
+    'NHL:4'      => '#FF3333',  // Chicago Blackhawks — bright red
+    'NHL:17'     => '#0099FF',  // Colorado Avalanche — bright blue
+    'NHL:29'     => '#0099FF',  // Columbus Blue Jackets — bright blue (navy too dark)
+    'NHL:9'      => '#00CC66',  // Dallas Stars — bright green (dark green too dark)
+    'NHL:5'      => '#FF3333',  // Detroit Red Wings — bright red
+    'NHL:6'      => '#FF6600',  // Edmonton Oilers — bright orange
+    'NHL:26'     => '#FF3333',  // Florida Panthers — bright red
+    'NHL:8'      => '#C0C0C0',  // Los Angeles Kings — silver
+    'NHL:30'     => '#00CC66',  // Minnesota Wild — bright green (dark green too dark)
+    'NHL:10'     => '#FF3333',  // Montreal Canadiens — bright red
+    'NHL:27'     => '#FFD700',  // Nashville Predators — gold
+    'NHL:11'     => '#FF3333',  // New Jersey Devils — bright red
+    'NHL:12'     => '#0099FF',  // New York Islanders — bright blue
+    'NHL:13'     => '#0099FF',  // New York Rangers — bright blue
+    'NHL:14'     => '#FF3333',  // Ottawa Senators — bright red
+    'NHL:15'     => '#FF6600',  // Philadelphia Flyers — bright orange
+    'NHL:16'     => '#FFD700',  // Pittsburgh Penguins — gold
+    'NHL:18'     => '#00D0FF',  // San Jose Sharks — bright cyan (teal too dark)
+    'NHL:124292' => '#00D0FF',  // Seattle Kraken — ice blue/cyan
+    'NHL:19'     => '#0099FF',  // St. Louis Blues — bright blue
+    'NHL:20'     => '#0099FF',  // Tampa Bay Lightning — bright blue (navy too dark)
+    'NHL:21'     => '#0099FF',  // Toronto Maple Leafs — bright blue (navy too dark)
+    'NHL:129764' => '#0099FF',  // Utah Mammoth — bright blue
+    'NHL:22'     => '#0099FF',  // Vancouver Canucks — bright blue (navy too dark)
+    'NHL:37'     => '#FFD700',  // Vegas Golden Knights — gold
+    'NHL:23'     => '#FF3333',  // Washington Capitals — bright red
+    'NHL:28'     => '#0099FF',  // Winnipeg Jets — bright blue
+];
+
 function getSupportedSportMap(bool $includeCustom = true): array {
     global $sportEndpoints, $customSportFeeds;
 
@@ -110,8 +272,21 @@ function lookupFallbackTeamColor(?string $teamId): ?string {
     return $fallbackTeamColors[(string)$teamId] ?? null;
 }
 
-function getTeamColorBundle(array $team): array {
+function lookupLedTeamColor(string $leagueLabel, ?string $teamId): ?string {
+    global $ledTeamColors;
+    if ($teamId === null || $teamId === '') return null;
+    return $ledTeamColors[$leagueLabel . ':' . $teamId] ?? null;
+}
+
+function getTeamColorBundle(array $team, string $leagueLabel = ''): array {
     $teamId = isset($team['id']) ? (string)$team['id'] : null;
+
+    // LED override takes highest priority — curated bright colors for LED text display.
+    $ledColor = lookupLedTeamColor($leagueLabel, $teamId);
+    if ($ledColor !== null) {
+        $alternate = normalizeHexColor($team['alternateColor'] ?? null) ?? '#000000';
+        return ['primary' => $ledColor, 'alternate' => $alternate];
+    }
 
     $primary = normalizeHexColor($team['color'] ?? null);
     $alternate = normalizeHexColor($team['alternateColor'] ?? null);
@@ -472,8 +647,8 @@ function fetchScoreboard(string $apiUrl, string $leagueLabel): array {
         $homeScore = $home['score'] ?? '0';
         $awayScore = $away['score'] ?? '0';
 
-        $homeColors = getTeamColorBundle($homeTeam);
-        $awayColors = getTeamColorBundle($awayTeam);
+        $homeColors = getTeamColorBundle($homeTeam, $leagueLabel);
+        $awayColors = getTeamColorBundle($awayTeam, $leagueLabel);
         $homeScoreNum = parseScoreOrNull($homeScore);
         $awayScoreNum = parseScoreOrNull($awayScore);
         $scoreStyling = scorePresentation($homeScoreNum, $awayScoreNum);

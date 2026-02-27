@@ -4,6 +4,16 @@ All notable changes to this project are tracked here.
 
 Unreleased
 ----------
+- Added `$ledTeamColors` — a comprehensive LED-optimized team color override map covering all 32 NFL
+  teams, all 30 NBA teams, all 30 MLB teams, all 32 NHL teams, and the Big10 NCAA Football teams
+  (plus active non-conference teams in `ncaateams.list`).
+- Added `lookupLedTeamColor(string $leagueLabel, ?string $teamId): ?string` helper.
+- Modified `getTeamColorBundle()` to accept `$leagueLabel` and check `$ledTeamColors` first before
+  ESPN API colors or the legacy `$fallbackTeamColors` map.
+- Updated `fetchScoreboard()` call sites to pass `$leagueLabel` to `getTeamColorBundle()`.
+- Color selection criteria: bright, saturated hues for text legibility on a black 8×128 addressable
+  RGB LED panel; dark primaries replaced with bright accents (e.g., Iowa gold `#FFCD00`, Michigan
+  maize `#FFCB05`, Penn State blue `#0099FF` in place of near-black/dark-navy originals).
 - Removed RSS item-level `description` element now that scroll text is fully encoded in item `title`.
 - Updated RSS item title rendering for scrollers: replaced `@` with `at`, added six spaces, and appended the item detail text.
 - Removed `state` from JSON game objects while keeping `isLive`.

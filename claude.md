@@ -48,8 +48,12 @@ Formatting logic
 - Baseball inning phrasing
 
 Color logic
-- Prefer ESPN team color fields.
-- Use fallback map for specific teams when ESPN colors are missing.
+- Priority 1: `$ledTeamColors` — curated LED-optimized overrides keyed by `'<leagueLabel>:<teamId>'`.
+  Covers all NFL, NBA, MLB, NHL teams and all active NCAA Football / Big10 teams.
+  Colors are chosen for bright text readability on a black 8×128 addressable RGB LED panel.
+  Dark primaries are replaced with bright accents (gold, bright red, bright blue, etc.).
+- Priority 2: ESPN team color fields (`team.color`, `team.alternateColor`).
+- Priority 3: `$fallbackTeamColors` — legacy Big10 ID map for when ESPN fields are absent.
 - Score colors indicate leader/trailer/tie/unknown.
 
 CI and local checks

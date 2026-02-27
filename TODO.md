@@ -7,6 +7,12 @@ High-value next items
 - Add fixture-based parser tests for status wording and score presentation.
 - Add all-sports smoke tests (`nhl`, `nba`, `mlb`, `nfl`, `ncaaf`, `big10`).
 
+Recently completed (2026-02-27)
+-------------------------------
+- Added `$ledTeamColors` override map — LED-optimized colors for NFL, NBA, MLB, NHL, and Big10 NCAAF
+  teams; dark/unreadable primaries replaced with bright accents for 8×128 RGB LED panel display.
+- Extended `getTeamColorBundle()` to check LED overrides first, before ESPN API or legacy fallback map.
+
 Recently completed (2026-02-23)
 -------------------------------
 - Moved machine-format routing (`format=rss`, `format=json`) to run before static HTML in `html/espn_scores_rss.php`.

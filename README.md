@@ -75,8 +75,14 @@ Score/state metadata:
 
 Team colors
 -----------
-- Primary source: ESPN team color fields (`team.color`, `team.alternateColor`)
-- Fallback source: internal map for currently enabled Big Ten feed IDs when ESPN fields are missing
+- Primary source: `$ledTeamColors` — a curated override map of LED-optimized colors covering all
+  supported leagues (NFL, NBA, MLB, NHL, NCAA Football / Big10). Keys are `'<leagueLabel>:<teamId>'`.
+  These always take precedence over ESPN API colors.
+- Secondary source: ESPN team color fields (`team.color`, `team.alternateColor`)
+- Tertiary source: `$fallbackTeamColors` — legacy per-ID map for Big Ten teams when ESPN fields are missing
+- Colors in the LED map are selected for readability as text on a black 8×128 addressable RGB panel.
+  Dark primaries (dark navy, maroon, forest green, near-black) are replaced with bright accents
+  (e.g., Iowa `#FFCD00` gold instead of `#231F20`, Michigan `#FFCB05` maize instead of `#00274C` navy).
 
 Team filtering (`big10`)
 ------------------------

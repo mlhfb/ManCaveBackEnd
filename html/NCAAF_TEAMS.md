@@ -31,6 +31,8 @@ How to update
 1. Find/confirm ESPN team IDs.
 2. Add or edit rows in `html/ncaateams.list`.
 3. Prefix with `#` to disable a team.
+4. Add a matching `'NCAA Football:<id>' => '#RRGGBB'` entry to `$ledTeamColors` in
+   `html/espn_scores_common.php` so the team has an LED-optimized color in JSON output.
 
 Generation helpers
 - `pwsh tools/generate_ncaateams.ps1`
