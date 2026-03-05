@@ -10,6 +10,13 @@ What is in this repo
 - `html/nhl.php`, `html/nba.php`, `html/mlb.php`, `html/nfl.php`: sport-specific RSS endpoints.
 - `html/ncaaf.php`: legacy endpoint that outputs the filtered `big10` feed.
 - `html/ncaateams.list`: enabled/disabled team list used by the `big10` filter.
+- OTA backend:
+- `html/ota_manifest.php`: device-facing OTA manifest endpoint.
+- `html/ota_releases.php`: release catalog/debug endpoint.
+- `html/ota_common.php`: shared OTA helpers.
+- `tools/publish_ota_release.php`: publish firmware + update release registry.
+- `artifacts/ota/releases.json`: OTA release registry.
+- `html/firmware/`: OTA firmware binaries (`.bin`).
 
 Supported sport keys
 - `nhl`
@@ -42,6 +49,10 @@ Legacy single-sport RSS endpoints:
 - `/html/mlb.php`
 - `/html/nfl.php`
 - `/html/ncaaf.php` (alias for filtered `big10`)
+
+OTA endpoints:
+- `/html/ota_manifest.php?channel=stable`
+- `/html/ota_releases.php?channel=stable`
 
 Output formats
 --------------
@@ -123,11 +134,17 @@ Run the endpoint-format regression checks:
 php html/test_endpoint_formats.php
 ```
 
+Run OTA endpoint checks:
+```powershell
+php html/test_ota_endpoints.php
+```
+
 See also
 --------
 - `DEVELOPMENT.md`
 - `CHANGELOG.md`
 - `TODO.md`
+- `howto.md`
 - `claude.md`
 - `examples/rssarduino_sites_snippet.md`
 - `html/NCAAF_TEAMS.md`

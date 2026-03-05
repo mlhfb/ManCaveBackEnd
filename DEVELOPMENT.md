@@ -39,6 +39,11 @@ Endpoint format regression:
 php html/test_endpoint_formats.php
 ```
 
+OTA endpoint regression:
+```powershell
+php html/test_ota_endpoints.php
+```
+
 Team list generation:
 - PowerShell generator:
 ```powershell
@@ -84,3 +89,17 @@ Notes
 - ESPN endpoint structure can change; keep parsing defensive.
 - Legacy scroller clients expect simple RSS fields (`title`, `description`, `pubDate`).
 - `$ledTeamColors` overrides take priority over ESPN API colors; designed for 8×128 RGB LED panels.
+
+OTA publishing quick reference
+------------------------------
+```powershell
+php tools/publish_ota_release.php `
+  --version 0.2.0 `
+  --file "C:\path\to\firmware.bin" `
+  --channel stable `
+  --notes "OTA support"
+```
+
+Then verify:
+- `/ota_releases.php?channel=stable`
+- `/ota_manifest.php?channel=stable`
